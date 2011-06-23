@@ -33,7 +33,7 @@ class Vault
   save: (complete_callback) ->
     # Don't bother if we're offline or there's nothing to sync.
     unless navigator.onLine and @dirty_objects != 0
-      complete_callback()
+      complete_callback
       return
 
     # Clear out any previous errors; this is important because we use the errors
@@ -54,11 +54,11 @@ class Vault
               @errors.push 'Failed to delete.'
               # Check to see if we're done.
               if @dirty_objects - @errors.length == 0
-                complete_callback()
+                complete_callback
             complete: ->
               # Check to see if we're done.
               if @dirty_objects - @errors.length == 0
-                complete_callback()
+                complete_callback
             dataType: 'json'
         else if object[@id_attribute] == undefined
           # This is a new object to be added.
@@ -73,11 +73,11 @@ class Vault
               @errors.push 'Failed to create.'
               # Check to see if we're done.
               if @dirty_objects - @errors.length == 0
-                complete_callback()
+                complete_callback
             complete: ->
               # Check to see if we're done.
               if @dirty_objects - @errors.length == 0
-                complete_callback()
+                complete_callback
             dataType: 'json'
         else
           # This is a pre-existing object to be updated.
@@ -90,11 +90,11 @@ class Vault
               @errors.push 'Failed to update.'
               # Check to see if we're done.
               if @dirty_objects - @errors.length == 0
-                complete_callback()
+                complete_callback
             complete: ->
               # Check to see if we're done.
               if @dirty_objects - @errors.length == 0
-                complete_callback()
+                complete_callback
             dataType: 'json'
   # Used to wipe out the in-memory object list with a fresh one from the server.
   reload: (complete_callback) ->
@@ -113,12 +113,16 @@ class Vault
         @dirty_objects = 0
 
         # Call the callback function as the reload is complete.
-        complete_callback()
+        complete_callback
       error: => @errors.push 'Failed to list.'
 
   # Convenience method for saving and reloading in one shot.
   synchronize: (complete_callback) ->
-    this.save(this.reload(complete_callback))
+    @save ->
+      if @errors.length == 0
+        @reload(complete_callback)
+      else
+        complete_callback
 
   # Attach the Vault class to the window so that it can be used by other scripts.
   window.Vault = this

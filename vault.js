@@ -34,9 +34,10 @@
     Vault.prototype.save = function(complete_callback) {
       var object, sync_error, _i, _len, _ref, _results;
       if (!(navigator.onLine && this.dirty_objects !== 0)) {
-        complete_callback();
+        complete_callback;
         return;
       }
+      this.errors = [];
       sync_error = false;
       _ref = this.objects;
       _results = [];
@@ -50,11 +51,14 @@
             return object.changed = false;
           },
           error: __bind(function() {
-            return this.errors.push('Failed to delete.');
+            this.errors.push('Failed to delete.');
+            if (this.dirty_objects - this.errors.length === 0) {
+              return complete_callback;
+            }
           }, this),
           complete: function() {
-            if (--dirty_objects === 0) {
-              return complete_callback();
+            if (this.dirty_objects - this.errors.length === 0) {
+              return complete_callback;
             }
           },
           dataType: 'json'
@@ -67,11 +71,14 @@
             return object.changed = false;
           }, this),
           error: __bind(function() {
-            return this.errors.push('Failed to create.');
+            this.errors.push('Failed to create.');
+            if (this.dirty_objects - this.errors.length === 0) {
+              return complete_callback;
+            }
           }, this),
           complete: function() {
-            if (--dirty_objects === 0) {
-              return complete_callback();
+            if (this.dirty_objects - this.errors.length === 0) {
+              return complete_callback;
             }
           },
           dataType: 'json'
@@ -83,11 +90,14 @@
             return object.changed = false;
           },
           error: __bind(function() {
-            return this.errors.push('Failed to update.');
+            this.errors.push('Failed to update.');
+            if (this.dirty_objects - this.errors.length === 0) {
+              return complete_callback;
+            }
           }, this),
           complete: function() {
-            if (--dirty_objects === 0) {
-              return complete_callback();
+            if (this.dirty_objects - this.errors.length === 0) {
+              return complete_callback;
             }
           },
           dataType: 'json'
@@ -108,7 +118,7 @@
             object.changed = false;
           }
           this.dirty_objects = 0;
-          return complete_callback();
+          return complete_callback;
         }, this),
         error: __bind(function() {
           return this.errors.push('Failed to list.');
@@ -116,7 +126,13 @@
       });
     };
     Vault.prototype.synchronize = function(complete_callback) {
-      return this.save(this.reload(complete_callback));
+      return this.save(function() {
+        if (this.errors.length === 0) {
+          return this.reload(complete_callback);
+        } else {
+          return complete_callback;
+        }
+      });
     };
     window.Vault = Vault;
     return Vault;
