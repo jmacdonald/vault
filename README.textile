@@ -36,6 +36,8 @@ Iterates over any dirty objects and saves the changes to the server, individuall
 
 h3. reload(complete_callback)
 
+Discards the current collection and reloads it from the server using the _list_ url configured in the constructor. When used alone, this function is handy for purging any changes and starting from scratch.
+
 * *complete_callback:* A function to call once the save operation is complete. This is handy for dismissing loading masks.
 
 h3. synchronize(complete_callback)

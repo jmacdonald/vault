@@ -95,7 +95,7 @@
       }
       return _results;
     };
-    Vault.prototype.reload = function() {
+    Vault.prototype.reload = function(complete_callback) {
       return $.ajax({
         url: this.urls.list,
         dataType: 'json',
@@ -107,15 +107,16 @@
             object = _ref[_i];
             object.changed = false;
           }
-          return this.dirty_objects = 0;
+          this.dirty_objects = 0;
+          return complete_callback();
         }, this),
         error: __bind(function() {
           return this.errors.push('Failed to list.');
         }, this)
       });
     };
-    Vault.prototype.synchronize = function() {
-      return this.save(this.reload);
+    Vault.prototype.synchronize = function(complete_callback) {
+      return this.save(this.reload(complete_callback));
     };
     window.Vault = Vault;
     return Vault;
