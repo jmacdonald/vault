@@ -81,7 +81,7 @@ class Vault
             ,
             dataType: 'json'
   # Used to wipe out the in-memory object list with a fresh one from the server.
-  reload: ->
+  reload: (complete_callback) ->
     $.ajax
       url: @urls.list
       dataType: 'json'
@@ -95,11 +95,14 @@ class Vault
 
         # Reset the count of dirty objects.
         @dirty_objects = 0
+
+        # Call the callback function as the reload is complete.
+        complete_callback()
       error: => @errors.push 'Failed to list.'
 
   # Convenience method for saving and reloading in one shot.
-  synchronize: ->
-    this.save(this.reload)
+  synchronize: (complete_callback) ->
+    this.save(this.reload(complete_callback))
 
   # Attach the Vault class to the window so that it can be used by other scripts.
   window.Vault = this

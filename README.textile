@@ -2,5 +2,44 @@ h2. Vault
 
 CoffeeScript/JavaScript online/offline data store.
 
-h3. Usage
+h3. Constructor
 
+<pre>
+var my_vault = new Vault(name, urls, id_attribute);
+</pre>
+
+* *name:* The name of your dataset. This must be unique across multiple vaults, since it's used as a key for offline storage.
+* *urls:* A dictionary/hash map of up to four URLs used to read/write data from a *JSON* web service.
+** *list:* GET url for all of the objects in the collection.
+** *create:* POST url for a new object in the collection.
+** *update:* POST (I know, should be PUT, but ran into some issues with browser support) url for an existing object in the collection.
+** *delete:* DELETE url for an existing object in the collection.
+* *id_attribute*: The unique identifier for this dataset.
+
+h3. fetch(id)
+
+Used to retrieve an object from the collection.
+
+* *id:* The id of the object to retrieve. This is based on the _id_attribute_ set in the constructor.
+
+h3. delete(id)
+
+Used to update an object in the collection.
+
+* *id:* The id of the object to delete. This is based on the _id_attribute_ set in the constructor.
+
+h3. save(complete_callback)
+
+Iterates over any dirty objects and saves the changes to the server, individually, using the urls configured in the constructor. This method checks if you're online before attempting to do any of this.
+
+* *complete_callback:* A function to call once the save operation is complete. This is handy for dismissing loading masks.
+
+h3. reload(complete_callback)
+
+* *complete_callback:* A function to call once the save operation is complete. This is handy for dismissing loading masks.
+
+h3. synchronize(complete_callback)
+
+Convenience function for saving and reloading in a single shot.
+
+* *complete_callback:* A function to call once the save operation is complete. This is handy for dismissing loading masks.
