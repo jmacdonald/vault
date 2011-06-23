@@ -1,14 +1,33 @@
 class Vault
-  constructor: (options) ->
+  constructor: (name, urls, id_attribute) ->
     # Setup some internal variables.
     @objects = []
     @dirty_objects = 0
     @errors = []
 
-    # Import options for the data store.
-    @name = options.name
-    @urls = options.urls
-    @id_attribute = options.id_attribute
+    # Import required parameters for the data store.
+    @name = name
+    @urls = urls
+    @id_attribute = id_attribute
+
+  # Fetch an object in the collection using its id.
+  fetch: (id) ->
+    for object in objects
+      if object[@id_attribute] == id
+        return object
+
+    # Object not found.
+    return false
+
+  # Flag an object in the collection for deletion, using its id.
+  delete: (id) ->
+    for object in objects
+      if object[@id_attribute] == id
+        object.deleted = true
+        return true
+
+    # Object not found.
+    return false
 
   # Write local changes back to the server, using per-object requests.
   save: (complete_callback) ->
@@ -23,11 +42,11 @@ class Vault
       if object.changed
         if object.deleted
           $.ajax
-            type: 'DELETE',
-            url: @urls.remove
+            type: 'DELETE'
+            url: @urls.delete
             data: object
             success: (data) -> object.changed = false
-            error: -> @errors.push 'Failed to delete.'
+            error: => @errors.push 'Failed to delete.'
             complete: ->
               if --dirty_objects == 0
                 complete_callback()
@@ -35,39 +54,38 @@ class Vault
             dataType: 'json'
         else if object[@id_attribute] == undefined
           # This is a new object to be added.
-          $.ajax(
+          $.ajax
             type: 'POST'
             url: @urls.create
             data: object
-            success: (data) ->
+            success: (data) =>
               object[@id_attribute] = data.id
               object.changed = false
-            error: -> @errors.push 'Failed to create.'
+            error: => @errors.push 'Failed to create.'
             complete: ->
               if --dirty_objects == 0
                 complete_callback()
             ,
             dataType: 'json'
-          )
         else
           # This is a pre-existing object to be updated.
-          $.ajax(
-            type: 'POST',
+          $.ajax
+            type: 'POST'
             url: @urls.update
             data: object
             success: (data) -> object.changed = false
-            error: -> @errors.push 'Failed to update.'
+            error: => @errors.push 'Failed to update.'
             complete: ->
               if --dirty_objects == 0
                 complete_callback()
             ,
             dataType: 'json'
-          )
   # Used to wipe out the in-memory object list with a fresh one from the server.
   reload: ->
-    $.getJSON(
-      @urls.list
-      (data) ->
+    $.ajax
+      url: @urls.list
+      dataType: 'json'
+      success: (data) =>
         # Replace the list of in-memory objects with the new data.
         @objects = data
 
@@ -77,7 +95,7 @@ class Vault
 
         # Reset the count of dirty objects.
         @dirty_objects = 0
-    )
+      error: => @errors.push 'Failed to list.'
 
   # Convenience method for saving and reloading in one shot.
   synchronize: ->
