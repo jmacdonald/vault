@@ -82,3 +82,6 @@ class Vault
   # Convenience method for saving and reloading in one shot.
   synchronize: ->
     this.save(this.reload)
+
+  # Attach the Vault class to the window so that it can be used by other scripts.
+  window.Vault = this

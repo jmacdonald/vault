@@ -88,6 +88,7 @@
     Vault.prototype.synchronize = function() {
       return this.save(this.reload);
     };
+    window.Vault = Vault;
     return Vault;
   })();
 }).call(this);
