@@ -1,6 +1,8 @@
-h2. Vault
+h1. Vault
 
 CoffeeScript/JavaScript online/offline data store.
+
+h2. Methods
 
 h3. Constructor
 
@@ -45,3 +47,7 @@ h3. synchronize(complete_callback)
 Convenience function for saving and reloading in a single shot.
 
 * *complete_callback:* A function to call once the save operation is complete. This is handy for dismissing loading masks.
+
+h2. Best Practices
+
+Make sure to check your vault's _errors_ array in your _complete_callback_ methods, since this method will be called regardless of whether or not the function succeeded. These errors will be flushed the next time you call the _save_ method.
