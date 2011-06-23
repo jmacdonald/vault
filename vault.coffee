@@ -36,6 +36,10 @@ class Vault
       complete_callback()
       return
 
+    # Clear out any previous errors; this is important because we use the errors
+    # array to track failed requests and determine when the save has completed.
+    @errors = []
+
     # Sync the in-memory data store to the server.
     sync_error = false
     for object in @objects
@@ -46,11 +50,15 @@ class Vault
             url: @urls.delete
             data: object
             success: (data) -> object.changed = false
-            error: => @errors.push 'Failed to delete.'
-            complete: ->
-              if --dirty_objects == 0
+            error: =>
+              @errors.push 'Failed to delete.'
+              # Check to see if we're done.
+              if @dirty_objects - @errors.length == 0
                 complete_callback()
-            ,
+            complete: ->
+              # Check to see if we're done.
+              if @dirty_objects - @errors.length == 0
+                complete_callback()
             dataType: 'json'
         else if object[@id_attribute] == undefined
           # This is a new object to be added.
@@ -61,11 +69,15 @@ class Vault
             success: (data) =>
               object[@id_attribute] = data.id
               object.changed = false
-            error: => @errors.push 'Failed to create.'
-            complete: ->
-              if --dirty_objects == 0
+            error: =>
+              @errors.push 'Failed to create.'
+              # Check to see if we're done.
+              if @dirty_objects - @errors.length == 0
                 complete_callback()
-            ,
+            complete: ->
+              # Check to see if we're done.
+              if @dirty_objects - @errors.length == 0
+                complete_callback()
             dataType: 'json'
         else
           # This is a pre-existing object to be updated.
@@ -74,11 +86,15 @@ class Vault
             url: @urls.update
             data: object
             success: (data) -> object.changed = false
-            error: => @errors.push 'Failed to update.'
-            complete: ->
-              if --dirty_objects == 0
+            error: =>
+              @errors.push 'Failed to update.'
+              # Check to see if we're done.
+              if @dirty_objects - @errors.length == 0
                 complete_callback()
-            ,
+            complete: ->
+              # Check to see if we're done.
+              if @dirty_objects - @errors.length == 0
+                complete_callback()
             dataType: 'json'
   # Used to wipe out the in-memory object list with a fresh one from the server.
   reload: (complete_callback) ->
