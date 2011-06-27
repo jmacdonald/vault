@@ -171,6 +171,10 @@
       });
     };
     Vault.prototype.synchronize = function(complete_callback) {
+      if (!navigator.onLine) {
+        this.errors.push('Cannot synchronize, navigator is offline.');
+        return complete_callback();
+      }
       return this.save(function() {
         if (this.errors.length === 0) {
           return this.reload(complete_callback);
@@ -180,6 +184,9 @@
       });
     };
     Vault.prototype.load = function() {
+      if (!this.options.offline) {
+        return false;
+      }
       if (localStorage.getItem(this.name)) {
         this.objects = $.parseJSON(localStorage.getItem(this.name));
         return true;
@@ -188,7 +195,11 @@
       }
     };
     Vault.prototype.store = function() {
-      return localStorage.setItem(this.name, JSON.stringify(this.objects));
+      if (!this.options.offline) {
+        return false;
+      }
+      localStorage.setItem(this.name, JSON.stringify(this.objects));
+      return true;
     };
     window.Vault = Vault;
     return Vault;
