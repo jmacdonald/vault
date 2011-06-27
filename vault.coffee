@@ -126,7 +126,6 @@ class Vault
   
   # Used to wipe out the in-memory object list with a fresh one from the server.
   reload: (complete_callback) ->
-
     # Don't bother if we're offline.
     unless navigator.onLine
       @errors.push 'Cannot reload, navigator is offline.'
@@ -161,23 +160,39 @@ class Vault
 
   # Convenience method for saving and reloading in one shot.
   synchronize: (complete_callback) ->
+    # Don't bother if we're offline.
+    unless navigator.onLine
+      @errors.push 'Cannot synchronize, navigator is offline.'
+      return complete_callback()
+
     @save ->
       if @errors.length == 0
         @reload(complete_callback)
       else
         complete_callback()
 
-  # Load the objects from offline storage.
+  # Load the collection from offline storage.
   load: ->
+    # Don't bother if offline support is disabled.
+    unless @options.offline
+      return false
+
+    # Try to load the collection.
     if localStorage.getItem(@name)
       @objects = $.parseJSON(localStorage.getItem @name)
       return true
     else
       return false
 
-  # Store the objects for offline use.
+  # Store the collection for offline use.
   store: ->
+    # Don't bother if offline support is disabled.
+    unless @options.offline
+      return false
+
+    # Store the collection.
     localStorage.setItem(@name, JSON.stringify(@objects))
+    return true
 
   # Attach the Vault class to the window so that it can be used by other scripts.
   window.Vault = this
