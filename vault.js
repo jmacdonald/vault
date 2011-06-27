@@ -117,7 +117,11 @@
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             object = _ref[_i];
             object.changed = false;
+            object.update = function() {
+              return this.changed = true;
+            };
             object["delete"] = function() {
+              this.changed = true;
               return this.deleted = true;
             };
           }

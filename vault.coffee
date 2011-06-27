@@ -107,7 +107,10 @@ class Vault
         # Extend the objects with vault-specific variables and functions.
         for object in @objects
           object.changed = false
+          object.update = ->
+            this.changed = true
           object.delete = ->
+            this.changed = true
             this.deleted = true
 
         # Reset the count of dirty objects.
