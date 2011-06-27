@@ -2,6 +2,10 @@ h1. Vault
 
 CoffeeScript/JavaScript online/offline data store.
 
+This library acts as a container for a collection of arbitrary objects, providing persistence using RESTful JSON web services and HTML5 offline storage. It will can a collection, add objects, track changes, and synchronize said changes back to the server. It's ideal for environments where a stable connection can't be guaranteed, and data (as well as modifications) need to be cached and synchronized in batch.
+
+Read-only apps need not specify all URLs; a list-only map will suffice.
+
 h2. Methods
 
 h3. Constructor
@@ -10,7 +14,7 @@ h3. Constructor
 var my_vault = new Vault(name, urls, id_attribute, [options]);
 </pre>
 
-* *name* The name of your dataset. This must be unique across multiple vaults, since it's used as a key for offline storage.
+* *name* The name of your dataset. This must be unique across multiple Vault instances, since it's used as a key for offline storage.
 * *urls* A dictionary/hash map of up to four URLs used to read/write data from a *JSON* web service:
 ** *list* GET url for all of the objects in the collection.
 ** *create* POST url for a new object in the collection.
@@ -60,6 +64,34 @@ _returns boolean for success/failure_
 h3. store()
 
 Store the collection in the offline data store.
+
+h2. Data Format
+
+As previously stated, this library works exclusively with JSON data sources. The expected formats for each URL are as follows:
+
+* *list:* _(GET)_ An array of objects
+Expected data:
+<pre>
+[{object1_attr1: value, object1_attr2: value},{object2_attr1: value, object2_attr2: value}]
+</pre>
+
+* *create:* _(POST)_ An object, sent without an id.
+POSTed data:
+<pre>
+{object1_attr1: value, object1_attr2: value}
+</pre>
+
+* *update:* _(POST)_ An object.
+POSTed data:
+<pre>
+{object1_attr1: value, object1_attr2: value}
+</pre>
+
+* *delete:* _(DELETE)_ An object.
+DELETEd data:
+<pre>
+{object1_attr1: value, object1_attr2: value}
+</pre>
 
 h2. Best Practices
 
