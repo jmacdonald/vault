@@ -20,6 +20,11 @@
         value = options[option];
         this.options[option] = value;
       }
+      if (this.options.offline) {
+        $(window).unload(__bind(function() {
+          return this.store();
+        }, this));
+      }
     }
     Vault.prototype.fetch = function(id) {
       var object, _i, _len, _ref;
@@ -153,6 +158,17 @@
           return complete_callback();
         }
       });
+    };
+    Vault.prototype.load = function() {
+      if (localStorage.getItem(this.name)) {
+        this.objects = $.parseJSON(localStorage.getItem(this.name));
+        return true;
+      } else {
+        return false;
+      }
+    };
+    Vault.prototype.store = function() {
+      return localStorage.setItem(this.name, JSON.stringify(this.objects));
     };
     window.Vault = Vault;
     return Vault;

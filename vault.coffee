@@ -18,6 +18,13 @@ class Vault
     for option, value of options
       @options[option] = value
 
+    # Setup the vault for offline use.
+    if @options.offline
+      # Bind a cache routine to save data should the window be closed or url changed.
+      $(window).unload =>
+        @store()
+
+
   # Fetch an object in the collection using its id.
   fetch: (id) ->
     for object in @objects
@@ -139,6 +146,18 @@ class Vault
         @reload(complete_callback)
       else
         complete_callback()
+
+  # Load the objects from offline storage.
+  load: ->
+    if localStorage.getItem(@name)
+      @objects = $.parseJSON(localStorage.getItem @name)
+      return true
+    else
+      return false
+
+  # Store the objects for offline use.
+  store: ->
+    localStorage.setItem(@name, JSON.stringify(@objects))
 
   # Attach the Vault class to the window so that it can be used by other scripts.
   window.Vault = this
