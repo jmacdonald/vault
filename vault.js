@@ -117,6 +117,9 @@
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             object = _ref[_i];
             object.changed = false;
+            object["delete"] = function() {
+              return this.deleted = true;
+            };
           }
           this.dirty_objects = 0;
           return complete_callback();

@@ -104,9 +104,11 @@ class Vault
         # Replace the list of in-memory objects with the new data.
         @objects = data
 
-        # Set all of the objects to clean status.
+        # Extend the objects with vault-specific variables and functions.
         for object in @objects
           object.changed = false
+          object.delete = ->
+            this.deleted = true
 
         # Reset the count of dirty objects.
         @dirty_objects = 0

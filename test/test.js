@@ -10,6 +10,6 @@ $(document).ready(function() {
         road.name = 'test!';
         console.log(road);
 
-        vault.delete(1304);
+        road.delete();
     });
 });
