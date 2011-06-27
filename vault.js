@@ -2,13 +2,24 @@
   var Vault;
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
   Vault = (function() {
-    function Vault(name, urls, id_attribute) {
+    function Vault(name, urls, id_attribute, options) {
+      var option, value;
+      if (options == null) {
+        options = {};
+      }
       this.objects = [];
       this.dirty_objects = 0;
       this.errors = [];
       this.name = name;
       this.urls = urls;
       this.id_attribute = id_attribute;
+      this.options = {
+        offline: false
+      };
+      for (option in options) {
+        value = options[option];
+        this.options[option] = value;
+      }
     }
     Vault.prototype.fetch = function(id) {
       var object, _i, _len, _ref;

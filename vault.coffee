@@ -1,5 +1,5 @@
 class Vault
-  constructor: (name, urls, id_attribute) ->
+  constructor: (name, urls, id_attribute, options = {}) ->
     # Setup some internal variables.
     @objects = []
     @dirty_objects = 0
@@ -9,6 +9,14 @@ class Vault
     @name = name
     @urls = urls
     @id_attribute = id_attribute
+
+    # Declare default options.
+    @options =
+      offline: false
+
+    # Merge default options with user-defined ones.
+    for option, value of options
+      @options[option] = value
 
   # Fetch an object in the collection using its id.
   fetch: (id) ->

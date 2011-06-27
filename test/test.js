@@ -4,7 +4,7 @@ $(document).ready(function() {
     var urls = {
         list: "test.json"
     }
-    vault = new Vault('roads', urls, "id");
+    vault = new Vault('roads', urls, "id", {offline: true});
     vault.reload(function() {
         road = vault.fetch(1304);
         road.name = 'test!';
