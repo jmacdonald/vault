@@ -11,9 +11,10 @@
       this.id_attribute = id_attribute;
     }
     Vault.prototype.fetch = function(id) {
-      var object, _i, _len;
-      for (_i = 0, _len = objects.length; _i < _len; _i++) {
-        object = objects[_i];
+      var object, _i, _len, _ref;
+      _ref = this.objects;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        object = _ref[_i];
         if (object[this.id_attribute] === id) {
           return object;
         }
@@ -21,9 +22,10 @@
       return false;
     };
     Vault.prototype["delete"] = function(id) {
-      var object, _i, _len;
-      for (_i = 0, _len = objects.length; _i < _len; _i++) {
-        object = objects[_i];
+      var object, _i, _len, _ref;
+      _ref = this.objects;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        object = _ref[_i];
         if (object[this.id_attribute] === id) {
           object.deleted = true;
           return true;
@@ -34,8 +36,7 @@
     Vault.prototype.save = function(complete_callback) {
       var object, sync_error, _i, _len, _ref, _results;
       if (!(navigator.onLine && this.dirty_objects !== 0)) {
-        complete_callback;
-        return;
+        return complete_callback();
       }
       this.errors = [];
       sync_error = false;
@@ -53,12 +54,12 @@
           error: __bind(function() {
             this.errors.push('Failed to delete.');
             if (this.dirty_objects - this.errors.length === 0) {
-              return complete_callback;
+              return complete_callback();
             }
           }, this),
           complete: function() {
             if (this.dirty_objects - this.errors.length === 0) {
-              return complete_callback;
+              return complete_callback();
             }
           },
           dataType: 'json'
@@ -73,12 +74,12 @@
           error: __bind(function() {
             this.errors.push('Failed to create.');
             if (this.dirty_objects - this.errors.length === 0) {
-              return complete_callback;
+              return complete_callback();
             }
           }, this),
           complete: function() {
             if (this.dirty_objects - this.errors.length === 0) {
-              return complete_callback;
+              return complete_callback();
             }
           },
           dataType: 'json'
@@ -92,12 +93,12 @@
           error: __bind(function() {
             this.errors.push('Failed to update.');
             if (this.dirty_objects - this.errors.length === 0) {
-              return complete_callback;
+              return complete_callback();
             }
           }, this),
           complete: function() {
             if (this.dirty_objects - this.errors.length === 0) {
-              return complete_callback;
+              return complete_callback();
             }
           },
           dataType: 'json'
@@ -118,10 +119,11 @@
             object.changed = false;
           }
           this.dirty_objects = 0;
-          return complete_callback;
+          return complete_callback();
         }, this),
         error: __bind(function() {
-          return this.errors.push('Failed to list.');
+          this.errors.push('Failed to list.');
+          return complete_callback();
         }, this)
       });
     };
@@ -130,7 +132,7 @@
         if (this.errors.length === 0) {
           return this.reload(complete_callback);
         } else {
-          return complete_callback;
+          return complete_callback();
         }
       });
     };
