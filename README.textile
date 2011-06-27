@@ -7,16 +7,19 @@ h2. Methods
 h3. Constructor
 
 <pre>
-var my_vault = new Vault(name, urls, id_attribute);
+var my_vault = new Vault(name, urls, id_attribute, [options]);
 </pre>
 
 * *name:* The name of your dataset. This must be unique across multiple vaults, since it's used as a key for offline storage.
-* *urls:* A dictionary/hash map of up to four URLs used to read/write data from a *JSON* web service.
+* *urls:* A dictionary/hash map of up to four URLs used to read/write data from a *JSON* web service:
 ** *list:* GET url for all of the objects in the collection.
 ** *create:* POST url for a new object in the collection.
 ** *update:* POST (I know, should be PUT, but ran into some issues with browser support) url for an existing object in the collection.
 ** *delete:* DELETE url for an existing object in the collection.
 * *id_attribute*: The unique identifier for this dataset.
+* *options:* A dictionary/hash map of options for the vault:
+** *autoload:* (true) Automatically load the dataset upon initialization, favoring offline data if enabled and available in the local storage. If offline load fails, defaults to loading live data.
+** *offline:* (_false_) Serializes and stores the collection for offline use whenever the page is unloaded.
 
 h3. fetch(id)
 
@@ -47,6 +50,16 @@ h3. synchronize(complete_callback)
 Convenience function for saving and reloading in a single shot.
 
 * *complete_callback:* A function to call once the save operation is complete. This is handy for dismissing loading masks.
+
+h3. load()
+
+Load the collection from the offline data store.
+
+_Returns: boolean (for success/failure)_
+
+h3. store()
+
+Store the collection in the offline data store.
 
 h2. Best Practices
 

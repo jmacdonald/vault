@@ -14,11 +14,21 @@
       this.urls = urls;
       this.id_attribute = id_attribute;
       this.options = {
+        autoload: true,
         offline: false
       };
       for (option in options) {
         value = options[option];
         this.options[option] = value;
+      }
+      if (this.options.autoload) {
+        if (this.options.offline) {
+          if (!this.load()) {
+            this.reload();
+          }
+        } else {
+          this.reload();
+        }
       }
       if (this.options.offline) {
         $(window).unload(__bind(function() {
@@ -52,6 +62,12 @@
     Vault.prototype.save = function(complete_callback) {
       var object, sync_error, _i, _len, _ref, _results;
       if (!(navigator.onLine && this.dirty_objects !== 0)) {
+        if (!navigator.onLine) {
+          this.errors.push('Cannot reload, navigator is offline.');
+        }
+        if (this.dirty_objects === 0) {
+          this.errors.push('Nothing to sync.');
+        }
         return complete_callback();
       }
       this.errors = [];
@@ -123,6 +139,10 @@
       return _results;
     };
     Vault.prototype.reload = function(complete_callback) {
+      if (!navigator.onLine) {
+        this.errors.push('Cannot reload, navigator is offline.');
+        return complete_callback();
+      }
       return $.ajax({
         url: this.urls.list,
         dataType: 'json',

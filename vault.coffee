@@ -12,18 +12,27 @@ class Vault
 
     # Declare default options.
     @options =
+      autoload: true
       offline: false
 
     # Merge default options with user-defined ones.
     for option, value of options
       @options[option] = value
 
+    # Load the collection if configured to do so.
+    if @options.autoload
+      # Check the offline data store first, if configured to do so.
+      if @options.offline
+        if not @load()
+          @reload()
+      else
+        @reload()
+
     # Setup the vault for offline use.
     if @options.offline
       # Bind a cache routine to save data should the window be closed or url changed.
       $(window).unload =>
         @store()
-
 
   # Fetch an object in the collection using its id.
   fetch: (id) ->
@@ -48,6 +57,10 @@ class Vault
   save: (complete_callback) ->
     # Don't bother if we're offline or there's nothing to sync.
     unless navigator.onLine and @dirty_objects != 0
+      unless navigator.onLine
+        @errors.push 'Cannot reload, navigator is offline.'
+      unless @dirty_objects != 0
+        @errors.push 'Nothing to sync.'
       return complete_callback()
 
     # Clear out any previous errors; this is important because we use the errors
@@ -110,8 +123,15 @@ class Vault
               if @dirty_objects - @errors.length == 0
                 complete_callback()
             dataType: 'json'
+  
   # Used to wipe out the in-memory object list with a fresh one from the server.
   reload: (complete_callback) ->
+
+    # Don't bother if we're offline.
+    unless navigator.onLine
+      @errors.push 'Cannot reload, navigator is offline.'
+      return complete_callback()
+
     $.ajax
       url: @urls.list
       dataType: 'json'
