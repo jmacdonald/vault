@@ -34,6 +34,16 @@ class Vault
       $(window).unload =>
         @store()
 
+  # Add a new item to the collection.
+  add: (new_object) ->
+    # Add the object to the collection.
+    new_object_index = @objects.push(new_object)-1
+
+    # Extend the object with vault-specific variables and functions.
+    new_object.changed = true
+    new_object.delete = =>
+      @objects.splice(new_object_index, 1)
+
   # Fetch an object in the collection using its id.
   fetch: (id) ->
     for object in @objects
@@ -54,7 +64,7 @@ class Vault
     return false
 
   # Write local changes back to the server, using per-object requests.
-  save: (complete_callback) ->
+  save: (complete_callback = ->) ->
     # Don't bother if we're offline or there's nothing to sync.
     unless navigator.onLine and @dirty_objects != 0
       unless navigator.onLine
@@ -125,7 +135,7 @@ class Vault
             dataType: 'json'
   
   # Used to wipe out the in-memory object list with a fresh one from the server.
-  reload: (complete_callback) ->
+  reload: (complete_callback = ->) ->
     # Don't bother if we're offline.
     unless navigator.onLine
       @errors.push 'Cannot reload, navigator is offline.'
@@ -159,7 +169,7 @@ class Vault
         complete_callback()
 
   # Convenience method for saving and reloading in one shot.
-  synchronize: (complete_callback) ->
+  synchronize: (complete_callback = ->) ->
     # Don't bother if we're offline.
     unless navigator.onLine
       @errors.push 'Cannot synchronize, navigator is offline.'

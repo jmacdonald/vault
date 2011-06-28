@@ -36,6 +36,14 @@
         }, this));
       }
     }
+    Vault.prototype.add = function(new_object) {
+      var new_object_index;
+      new_object_index = this.objects.push(new_object) - 1;
+      new_object.changed = true;
+      return new_object["delete"] = __bind(function() {
+        return this.objects.splice(new_object_index, 1);
+      }, this);
+    };
     Vault.prototype.fetch = function(id) {
       var object, _i, _len, _ref;
       _ref = this.objects;
@@ -61,6 +69,9 @@
     };
     Vault.prototype.save = function(complete_callback) {
       var object, sync_error, _i, _len, _ref, _results;
+      if (complete_callback == null) {
+        complete_callback = function() {};
+      }
       if (!(navigator.onLine && this.dirty_objects !== 0)) {
         if (!navigator.onLine) {
           this.errors.push('Cannot reload, navigator is offline.');
@@ -139,6 +150,9 @@
       return _results;
     };
     Vault.prototype.reload = function(complete_callback) {
+      if (complete_callback == null) {
+        complete_callback = function() {};
+      }
       if (!navigator.onLine) {
         this.errors.push('Cannot reload, navigator is offline.');
         return complete_callback();
@@ -171,6 +185,9 @@
       });
     };
     Vault.prototype.synchronize = function(complete_callback) {
+      if (complete_callback == null) {
+        complete_callback = function() {};
+      }
       if (!navigator.onLine) {
         this.errors.push('Cannot synchronize, navigator is offline.');
         return complete_callback();
