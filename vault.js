@@ -2,11 +2,8 @@
   var Vault;
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
   Vault = (function() {
-    function Vault(name, urls, id_attribute, options) {
+    function Vault(name, urls, options) {
       var option, value;
-      if (id_attribute == null) {
-        id_attribute = "id";
-      }
       if (options == null) {
         options = {};
       }
@@ -16,9 +13,9 @@
       this.date = new Date;
       this.name = name;
       this.urls = urls;
-      this.id_attribute = id_attribute;
       this.options = {
         autoload: true,
+        id_attribute: "id",
         offline: false
       };
       for (option in options) {
@@ -41,7 +38,7 @@
       }
     }
     Vault.prototype.add = function(object) {
-      object[this.id_attribute] = this.date.getTime();
+      object[this.options.id_attribute] = this.date.getTime();
       this.extend(object("new"));
       return this.objects.push(new_object);
     };
@@ -50,7 +47,7 @@
       _ref = this.objects;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         object = _ref[_i];
-        if (object[this.id_attribute] === id) {
+        if (object[this.options.id_attribute] === id) {
           return object;
         }
       }
@@ -61,7 +58,7 @@
       _ref = this.objects;
       for (object = 0, _len = _ref.length; object < _len; object++) {
         index = _ref[object];
-        if (object[this.id_attribute] === id) {
+        if (object[this.options.id_attribute] === id) {
           if (object.status === "new") {
             this.objects.splice(index, 1);
           } else {
@@ -126,7 +123,7 @@
                   return object = this.extend(data);
                 }, this),
                 error: __bind(function() {
-                  object[this.id_attribute] = temporary_id;
+                  object[this.options.id_attribute] = temporary_id;
                   this.extend(object("new"));
                   this.errors.push('Failed to create.');
                   if (this.dirty_objects - this.errors.length === 0) {
@@ -246,7 +243,7 @@
     };
     Vault.prototype.strip = function(object) {
       if (object.status === "new") {
-        delete object[this.id_attribute];
+        delete object[this.options.id_attribute];
       }
       delete object.status;
       delete object.update;

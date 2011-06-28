@@ -1,5 +1,5 @@
 class Vault
-  constructor: (name, urls, id_attribute = "id", options = {}) ->
+  constructor: (name, urls, options = {}) ->
     # Setup some internal variables.
     @objects = []
     @dirty_objects = 0
@@ -12,11 +12,11 @@ class Vault
     # Import required parameters for the data store.
     @name = name
     @urls = urls
-    @id_attribute = id_attribute
 
     # Declare default options.
     @options =
       autoload: true
+      id_attribute: "id"
       offline: false
 
     # Merge default options with user-defined ones.
@@ -41,7 +41,7 @@ class Vault
   # Add a new item to the collection.
   add: (object) ->
     # Generate a temporary id and add it to the object.
-    object[@id_attribute] = @date.getTime()
+    object[@options.id_attribute] = @date.getTime()
 
     # Extend the object with vault-specific variables and functions.
     @extend object "new"
@@ -52,7 +52,7 @@ class Vault
   # Fetch an object in the collection using its id.
   fetch: (id) ->
     for object in @objects
-      if object[@id_attribute] == id
+      if object[@options.id_attribute] == id
         return object
 
     # Object not found.
@@ -61,7 +61,7 @@ class Vault
   # Remove or flag an object in the collection for deletion, based on its status.
   delete: (id) ->
     for index, object in @objects
-      if object[@id_attribute] == id
+      if object[@options.id_attribute] == id
         if object.status == "new"
           @objects.splice(index, 1)
         else
@@ -119,7 +119,7 @@ class Vault
               object = @extend data
             error: =>
               # Restore the temporary id, since the request failed.
-              object[@id_attribute] = temporary_id
+              object[@options.id_attribute] = temporary_id
               
               @extend object "new"
               @errors.push 'Failed to create.'
@@ -229,7 +229,7 @@ class Vault
   strip: (object) ->
     # Remove the temporary id given to new objects.
     if object.status == "new"
-      delete object[@id_attribute]
+      delete object[@options.id_attribute]
     
     delete object.status
     delete object.update
