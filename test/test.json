@@ -1,1 +1,20 @@
-[{"allowed":true,"community":"Oz","id":1304,"name":"Apple road test "},{"allowed":true,"community":"Dowling","id":40,"name":"Arena Road"},{"allowed":true,"community":"Dowling","id":41,"name":"Arlington Drive East/West"}]
+[
+  {
+    "id": 1,
+    "make": "Ford",
+    "model": "Shelby Mustang GT500",
+    "year": 2009
+  },
+  {
+    "id": 2,
+    "make": "Mitsubishi",
+    "model": "Lancer Evolution X",
+    "year": 2010
+  },
+  {
+    "id": 3,
+    "make": "Nissan",
+    "model": "370Z Nismo",
+    "year": 2011
+  }
+]
