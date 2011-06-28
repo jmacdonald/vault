@@ -16,6 +16,7 @@ class Vault
     # Declare default options.
     @options =
       autoload: true
+      after_load: ->
       id_attribute: "id"
       offline: false
 
@@ -28,9 +29,9 @@ class Vault
       # Check the offline data store first, if configured to do so.
       if @options.offline
         if not @load()
-          @reload()
+          @reload(@options.after_load)
       else
-        @reload()
+        @reload(@options.after_load)
 
     # Setup the vault for offline use.
     if @options.offline
