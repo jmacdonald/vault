@@ -86,14 +86,14 @@ class Vault
     return false
 
   # Write local changes back to the server, using per-object requests.
-  save: (complete_callback = ->) ->
+  save: (after_save = ->) ->
     # Don't bother if we're offline or there's nothing to sync.
     unless navigator.onLine and @dirty_objects != 0
       unless navigator.onLine
         @errors.push 'Cannot reload, navigator is offline.'
       unless @dirty_objects != 0
         @errors.push 'Nothing to sync.'
-      return complete_callback()
+      return after_save()
 
     # Clear out any previous errors; this is important because we use the errors
     # array to track failed requests and determine when the save has completed.
@@ -114,11 +114,11 @@ class Vault
               @errors.push 'Failed to delete.'
               # Check to see if we're done.
               if @dirty_objects - @errors.length == 0
-                complete_callback()
+                after_save()
             complete: ->
               # Check to see if we're done.
               if @dirty_objects - @errors.length == 0
-                complete_callback()
+                after_save()
             dataType: 'json'
         when "new"
           # Store the temporary id so that we can restore
@@ -139,11 +139,11 @@ class Vault
               @errors.push 'Failed to create.'
               # Check to see if we're done.
               if @dirty_objects - @errors.length == 0
-                complete_callback()
+                after_save()
             complete: ->
               # Check to see if we're done.
               if @dirty_objects - @errors.length == 0
-                complete_callback()
+                after_save()
             dataType: 'json'
         when "dirty"
           $.ajax
@@ -156,19 +156,19 @@ class Vault
               @errors.push 'Failed to update.'
               # Check to see if we're done.
               if @dirty_objects - @errors.length == 0
-                complete_callback()
+                after_save()
             complete: ->
               # Check to see if we're done.
               if @dirty_objects - @errors.length == 0
-                complete_callback()
+                after_save()
             dataType: 'json'
   
   # Used to wipe out the in-memory object list with a fresh one from the server.
-  reload: (complete_callback = ->) ->
+  reload: (after_load = ->) ->
     # Don't bother if we're offline.
     unless navigator.onLine
       @errors.push 'Cannot reload, navigator is offline.'
-      return complete_callback()
+      return after_load()
 
     $.ajax
       url: @urls.list
@@ -185,25 +185,25 @@ class Vault
         @dirty_objects = 0
 
         # Call the callback function as the reload is complete.
-        complete_callback()
+        after_load()
       error: =>
         @errors.push 'Failed to list.'
 
         # Call the callback function as the reload is complete (albeit unsuccessful).
-        complete_callback()
+        after_load()
 
   # Convenience method for saving and reloading in one shot.
-  synchronize: (complete_callback = ->) ->
+  synchronize: (after_sync = ->) ->
     # Don't bother if we're offline.
     unless navigator.onLine
       @errors.push 'Cannot synchronize, navigator is offline.'
-      return complete_callback()
+      return after_sync()
 
     @save ->
       if @errors.length == 0
-        @reload(complete_callback)
+        @reload(after_sync)
       else
-        complete_callback()
+        after_sync()
 
   # Load the collection from offline storage.
   load: ->

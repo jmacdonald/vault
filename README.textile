@@ -22,6 +22,7 @@ var my_vault = new Vault(name, urls, [options]);
 ** *delete* DELETE url for an existing object in the collection.
 * *options* A dictionary/hash map of options for the vault:
 ** *autoload* _default: true_ Automatically load the dataset upon initialization, favoring offline data if enabled and available in the local storage. If offline load fails, defaults to loading live data.
+** *after_load* _default: null_ Function to call after the autoload process has completed.
 ** *id_attribute* _default: id_ The unique identifier for this dataset.
 ** *offline* _default: false_ Serializes and stores the collection for offline use whenever the page is unloaded.
 
@@ -57,23 +58,23 @@ Used to update an object in the collection.
 
 *Note:* All objects in the collection are extended with a _delete_ method which makes it easier to perform this task if you already have a reference to the target object.
 
-h3. save(complete_callback)
+h3. save(after_save)
 
 Iterates over any dirty objects and saves the changes to the server, individually, using the urls configured in the constructor. This method checks if you're online before attempting to do any of this.
 
-* *complete_callback* A function to call once the save operation is complete. This is handy for dismissing loading masks.
+* *after_save* A function to call once the save operation is complete. This is handy for dismissing loading masks.
 
-h3. reload(complete_callback)
+h3. reload(after_load)
 
 Discards the current collection and reloads it from the server using the _list_ url configured in the constructor. When used alone, this function is handy for purging any changes and starting from scratch.
 
-* *complete_callback* A function to call once the save operation is complete. This is handy for dismissing loading masks.
+* *after_load* A function to call once the save operation is complete. This is handy for dismissing loading masks.
 
-h3. synchronize(complete_callback)
+h3. synchronize(after_sync)
 
 Convenience function for saving and reloading in a single shot.
 
-* *complete_callback* A function to call once the save operation is complete. This is handy for dismissing loading masks.
+* *after_sync* A function to call once the save operation is complete. This is handy for dismissing loading masks.
 
 h3. load()
 
@@ -126,4 +127,4 @@ DELETEd data:
 
 h2. Best Practices
 
-Make sure to check your vault's _errors_ array in your _complete_callback_ methods, since this method will be called regardless of whether or not the function succeeded. These errors will be flushed the next time you call the _save_ method.
+Make sure to check your vault's _errors_ array in your _after_load/save/sync_ methods, since this method will be called regardless of whether or not the function succeeded. These errors will be flushed the next time you call the _save_ method.

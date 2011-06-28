@@ -15,6 +15,7 @@
       this.urls = urls;
       this.options = {
         autoload: true,
+        after_load: function() {},
         id_attribute: "id",
         offline: false
       };
@@ -25,10 +26,10 @@
       if (this.options.autoload) {
         if (this.options.offline) {
           if (!this.load()) {
-            this.reload();
+            this.reload(this.options.after_load);
           }
         } else {
-          this.reload();
+          this.reload(this.options.after_load);
         }
       }
       if (this.options.offline) {
@@ -85,10 +86,10 @@
       }
       return false;
     };
-    Vault.prototype.save = function(complete_callback) {
+    Vault.prototype.save = function(after_save) {
       var object, sync_error, temporary_id, _i, _len, _ref, _results;
-      if (complete_callback == null) {
-        complete_callback = function() {};
+      if (after_save == null) {
+        after_save = function() {};
       }
       if (!(navigator.onLine && this.dirty_objects !== 0)) {
         if (!navigator.onLine) {
@@ -97,7 +98,7 @@
         if (this.dirty_objects === 0) {
           this.errors.push('Nothing to sync.');
         }
-        return complete_callback();
+        return after_save();
       }
       this.errors = [];
       sync_error = false;
@@ -119,12 +120,12 @@
                   this.extend(object("deleted"));
                   this.errors.push('Failed to delete.');
                   if (this.dirty_objects - this.errors.length === 0) {
-                    return complete_callback();
+                    return after_save();
                   }
                 }, this),
                 complete: function() {
                   if (this.dirty_objects - this.errors.length === 0) {
-                    return complete_callback();
+                    return after_save();
                   }
                 },
                 dataType: 'json'
@@ -143,12 +144,12 @@
                   this.extend(object("new"));
                   this.errors.push('Failed to create.');
                   if (this.dirty_objects - this.errors.length === 0) {
-                    return complete_callback();
+                    return after_save();
                   }
                 }, this),
                 complete: function() {
                   if (this.dirty_objects - this.errors.length === 0) {
-                    return complete_callback();
+                    return after_save();
                   }
                 },
                 dataType: 'json'
@@ -165,12 +166,12 @@
                   this.extend(object("dirty"));
                   this.errors.push('Failed to update.');
                   if (this.dirty_objects - this.errors.length === 0) {
-                    return complete_callback();
+                    return after_save();
                   }
                 }, this),
                 complete: function() {
                   if (this.dirty_objects - this.errors.length === 0) {
-                    return complete_callback();
+                    return after_save();
                   }
                 },
                 dataType: 'json'
@@ -180,13 +181,13 @@
       }
       return _results;
     };
-    Vault.prototype.reload = function(complete_callback) {
-      if (complete_callback == null) {
-        complete_callback = function() {};
+    Vault.prototype.reload = function(after_load) {
+      if (after_load == null) {
+        after_load = function() {};
       }
       if (!navigator.onLine) {
         this.errors.push('Cannot reload, navigator is offline.');
-        return complete_callback();
+        return after_load();
       }
       return $.ajax({
         url: this.urls.list,
@@ -200,27 +201,27 @@
             this.extend(object);
           }
           this.dirty_objects = 0;
-          return complete_callback();
+          return after_load();
         }, this),
         error: __bind(function() {
           this.errors.push('Failed to list.');
-          return complete_callback();
+          return after_load();
         }, this)
       });
     };
-    Vault.prototype.synchronize = function(complete_callback) {
-      if (complete_callback == null) {
-        complete_callback = function() {};
+    Vault.prototype.synchronize = function(after_sync) {
+      if (after_sync == null) {
+        after_sync = function() {};
       }
       if (!navigator.onLine) {
         this.errors.push('Cannot synchronize, navigator is offline.');
-        return complete_callback();
+        return after_sync();
       }
       return this.save(function() {
         if (this.errors.length === 0) {
-          return this.reload(complete_callback);
+          return this.reload(after_sync);
         } else {
-          return complete_callback();
+          return after_sync();
         }
       });
     };
