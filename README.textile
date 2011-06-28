@@ -39,6 +39,16 @@ Used to retrieve an object from the collection.
 
 * *id* The id of the object to retrieve. This is based on the _id_attribute_ set in the constructor.
 
+*Note:* The object returned by this method can by updated and deleted by calling _update()_ and _delete()_, respectively, on the object itself.
+
+h3. update(object)
+
+Update an object in the collection. The object will be matched to its associated object in the collection based on its _id_attribute_.
+
+* *object* Updated object.
+
+*Note:* You can also update an object retrieved using the _fetch()_ method by calling _update()_ on the returned object itself.
+
 h3. delete(id)
 
 Used to update an object in the collection.
