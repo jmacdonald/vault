@@ -6,12 +6,12 @@ This library acts as a container for a collection of arbitrary objects, providin
 
 Read-only apps need not specify all URLs; a list-only map will suffice.
 
-h2. Methods
+h2. Vault - Public Methods
 
 h3. Constructor
 
 <pre>
-var my_vault = new Vault(name, urls, id_attribute, [options]);
+var my_vault = new Vault(name, urls, [options]);
 </pre>
 
 * *name* The name of your dataset. This must be unique across multiple Vault instances, since it's used as a key for offline storage.
@@ -20,10 +20,18 @@ var my_vault = new Vault(name, urls, id_attribute, [options]);
 ** *create* POST url for a new object in the collection.
 ** *update* POST (I know, should be PUT, but ran into some issues with browser support) url for an existing object in the collection.
 ** *delete* DELETE url for an existing object in the collection.
-* *id_attribute* The unique identifier for this dataset.
 * *options* A dictionary/hash map of options for the vault:
 ** *autoload* _default: true_ Automatically load the dataset upon initialization, favoring offline data if enabled and available in the local storage. If offline load fails, defaults to loading live data.
+** *id_attribute* _default: id_ The unique identifier for this dataset.
 ** *offline* _default: false_ Serializes and stores the collection for offline use whenever the page is unloaded.
+
+h3. add(object)
+
+Add an object to the collection.
+
+* *object* The new object to be added.
+
+*Note:* A unique id will be assigned to the new object, and will be superseded by a real id generated server-side after a successful save.
 
 h3. fetch(id)
 
@@ -36,6 +44,8 @@ h3. delete(id)
 Used to update an object in the collection.
 
 * *id* The id of the object to delete. This is based on the _id_attribute_ set in the constructor.
+
+*Note:* All objects in the collection are extended with a _delete_ method which makes it easier to perform this task if you already have a reference to the target object.
 
 h3. save(complete_callback)
 
@@ -65,33 +75,44 @@ h3. store()
 
 Store the collection in the offline data store.
 
+h2. Vault - Internal Methods
+
+You shouldn't be accessing these methods directly, but they're documented for development purposes.
+
+h3. extend(object, status)
+
+Extends an object with vault-specific variables and functions.
+
+* *object* The object to which the variables and functions will be applied.
+* *status* The status to which the object should be set when extended.
+
+h3. strip(object)
+
+Removes vault-specific variables and functions applied to an object.
+
+* *object* The object to which the variables and functions will be applied.
+
 h2. Data Format
 
 As previously stated, this library works exclusively with JSON data sources. The expected formats for each URL are as follows:
 
 * *list:* _(GET)_ An array of objects
 Expected data:
-<pre>
-[{object1_attr1: value, object1_attr2: value},{object2_attr1: value, object2_attr2: value}]
-</pre>
+<pre>[{object1_attr1: value, object1_attr2: value},{object2_attr1: value, object2_attr2: value}]</pre>
 
-* *create:* _(POST)_ An object, sent without an id.
+* *create:* _(POST)_ An object, sent without an id. Expects the same object returned with an id.
 POSTed data:
-<pre>
-{object1_attr1: value, object1_attr2: value}
-</pre>
+<pre>{object1_attr1: value, object1_attr2: value}</pre>
+Expected data:
+<pre>{object1_attr1: value, object1_attr2: value}</pre>
 
 * *update:* _(POST)_ An object.
 POSTed data:
-<pre>
-{object1_attr1: value, object1_attr2: value}
-</pre>
+<pre>{object1_attr1: value, object1_attr2: value}</pre>
 
 * *delete:* _(DELETE)_ An object.
 DELETEd data:
-<pre>
-{object1_attr1: value, object1_attr2: value}
-</pre>
+<pre>{object1_attr1: value, object1_attr2: value}</pre>
 
 h2. Best Practices
 
