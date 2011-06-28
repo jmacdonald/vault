@@ -42,10 +42,7 @@
     }
     Vault.prototype.add = function(object) {
       object.id = this.date.getTime();
-      object.status = "new";
-      object["delete"] = __bind(function() {
-        return this["delete"](object.id);
-      }, this);
+      this.extend(object("new"));
       return this.objects.push(new_object);
     };
     Vault.prototype.fetch = function(id) {
@@ -101,11 +98,12 @@
               return $.ajax({
                 type: 'DELETE',
                 url: this.urls["delete"],
-                data: object,
-                success: function(data) {
-                  return object.changed = false;
-                },
+                data: this.strip(object),
+                success: __bind(function(data) {
+                  return this.extend(object);
+                }, this),
                 error: __bind(function() {
+                  this.extend(object("deleted"));
                   this.errors.push('Failed to delete.');
                   if (this.dirty_objects - this.errors.length === 0) {
                     return complete_callback();
@@ -122,12 +120,12 @@
               return $.ajax({
                 type: 'POST',
                 url: this.urls.create,
-                data: object,
+                data: this.strip(object),
                 success: __bind(function(data) {
-                  object[this.id_attribute] = data.id;
-                  return object.changed = false;
+                  return object = this.extend(data);
                 }, this),
                 error: __bind(function() {
+                  this.extend(object("new"));
                   this.errors.push('Failed to create.');
                   if (this.dirty_objects - this.errors.length === 0) {
                     return complete_callback();
@@ -144,11 +142,12 @@
               return $.ajax({
                 type: 'POST',
                 url: this.urls.update,
-                data: object,
-                success: function(data) {
-                  return object.changed = false;
-                },
+                data: this.strip(object),
+                success: __bind(function(data) {
+                  return this.extend(object);
+                }, this),
                 error: __bind(function() {
+                  this.extend(object("dirty"));
                   this.errors.push('Failed to update.');
                   if (this.dirty_objects - this.errors.length === 0) {
                     return complete_callback();
@@ -183,13 +182,7 @@
           _ref = this.objects;
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             object = _ref[_i];
-            object.status = "clean";
-            object.update = function() {
-              return this.status = "dirty";
-            };
-            object["delete"] = function() {
-              return this.status = "deleted";
-            };
+            this.extend(object);
           }
           this.dirty_objects = 0;
           return complete_callback();
@@ -233,6 +226,26 @@
       }
       localStorage.setItem(this.name, JSON.stringify(this.objects));
       return true;
+    };
+    Vault.prototype.extend = function(object, status) {
+      if (status == null) {
+        status = "clean";
+      }
+      object.status = status;
+      object.update = function() {
+        if (this.status !== "new") {
+          return this.status = "dirty";
+        }
+      };
+      object["delete"] = __bind(function() {
+        return this["delete"](object.id);
+      }, this);
+      return object;
+    };
+    Vault.prototype.strip = function(object) {
+      delete object.status;
+      delete object.update;
+      return delete object["delete"];
     };
     window.Vault = Vault;
     return Vault;

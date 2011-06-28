@@ -44,9 +44,7 @@ class Vault
     object.id = @date.getTime()
 
     # Extend the object with vault-specific variables and functions.
-    object.status = "new"
-    object.delete = =>
-      @delete(object.id)
+    @extend object "new"
 
     # Add the object to the collection.
     @objects.push new_object
@@ -95,9 +93,10 @@ class Vault
           $.ajax
             type: 'DELETE'
             url: @urls.delete
-            data: object
-            success: (data) -> object.changed = false
+            data: @strip object
+            success: (data) => @extend object
             error: =>
+              @extend object "deleted"
               @errors.push 'Failed to delete.'
               # Check to see if we're done.
               if @dirty_objects - @errors.length == 0
@@ -112,11 +111,12 @@ class Vault
           $.ajax
             type: 'POST'
             url: @urls.create
-            data: object
+            data: @strip object
             success: (data) =>
-              object[@id_attribute] = data.id
-              object.changed = false
+              # Replace the existing object with the new one from the server and extend it.
+              object = @extend data
             error: =>
+              @extend object "new"
               @errors.push 'Failed to create.'
               # Check to see if we're done.
               if @dirty_objects - @errors.length == 0
@@ -131,9 +131,10 @@ class Vault
           $.ajax
             type: 'POST'
             url: @urls.update
-            data: object
-            success: (data) -> object.changed = false
+            data: @strip object
+            success: (data) => @extend object
             error: =>
+              @extend object "dirty"
               @errors.push 'Failed to update.'
               # Check to see if we're done.
               if @dirty_objects - @errors.length == 0
@@ -160,11 +161,7 @@ class Vault
 
         # Extend the objects with vault-specific variables and functions.
         for object in @objects
-          object.status = "clean"
-          object.update = ->
-            this.status = "dirty"
-          object.delete = ->
-            this.status = "deleted"
+          @extend object
 
         # Reset the count of dirty objects.
         @dirty_objects = 0
@@ -212,6 +209,23 @@ class Vault
     # Store the collection.
     localStorage.setItem(@name, JSON.stringify(@objects))
     return true
+
+  # Extend an object with vault-specific variables and functions.
+  extend: (object, status="clean") ->
+    object.status = status
+    object.update = ->
+      unless this.status == "new"
+        this.status = "dirty"
+    object.delete = =>
+      @delete(object.id)
+
+    return object
+
+  # Remove vault-specific variables and functions applied to an object.
+  strip: (object) ->
+    delete object.status
+    delete object.update
+    delete object.delete
 
   # Attach the Vault class to the window so that it can be used by other scripts.
   window.Vault = this
