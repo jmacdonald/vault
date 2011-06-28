@@ -73,7 +73,7 @@
       return false;
     };
     Vault.prototype.save = function(complete_callback) {
-      var object, sync_error, _i, _len, _ref, _results;
+      var object, sync_error, temporary_id, _i, _len, _ref, _results;
       if (complete_callback == null) {
         complete_callback = function() {};
       }
@@ -117,6 +117,7 @@
                 dataType: 'json'
               });
             case "new":
+              temporary_id = object.id;
               return $.ajax({
                 type: 'POST',
                 url: this.urls.create,
@@ -125,6 +126,7 @@
                   return object = this.extend(data);
                 }, this),
                 error: __bind(function() {
+                  object[this.id_attribute] = temporary_id;
                   this.extend(object("new"));
                   this.errors.push('Failed to create.');
                   if (this.dirty_objects - this.errors.length === 0) {
@@ -243,6 +245,9 @@
       return object;
     };
     Vault.prototype.strip = function(object) {
+      if (object.status === "new") {
+        delete object[this.id_attribute];
+      }
       delete object.status;
       delete object.update;
       return delete object["delete"];

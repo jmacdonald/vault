@@ -107,7 +107,9 @@ class Vault
                 complete_callback()
             dataType: 'json'
         when "new"
-          # This is a new object to be added.
+          # Store the temporary id so that we can restore
+          # it in case this request fails.
+          temporary_id = object.id
           $.ajax
             type: 'POST'
             url: @urls.create
@@ -116,6 +118,9 @@ class Vault
               # Replace the existing object with the new one from the server and extend it.
               object = @extend data
             error: =>
+              # Restore the temporary id, since the request failed.
+              object[@id_attribute] = temporary_id
+              
               @extend object "new"
               @errors.push 'Failed to create.'
               # Check to see if we're done.
@@ -127,7 +132,6 @@ class Vault
                 complete_callback()
             dataType: 'json'
         when "dirty"
-          # This is a pre-existing object to be updated.
           $.ajax
             type: 'POST'
             url: @urls.update
@@ -223,6 +227,10 @@ class Vault
 
   # Remove vault-specific variables and functions applied to an object.
   strip: (object) ->
+    # Remove the temporary id given to new objects.
+    if object.status == "new"
+      delete object[@id_attribute]
+    
     delete object.status
     delete object.update
     delete object.delete
