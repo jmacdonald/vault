@@ -40,8 +40,8 @@
     }
     Vault.prototype.add = function(object) {
       object[this.options.id_attribute] = this.date.getTime();
-      this.extend(object("new"));
-      return this.objects.push(new_object);
+      this.extend(object, "new");
+      return this.objects.push(object);
     };
     Vault.prototype.fetch = function(id) {
       var object, _i, _len, _ref;
@@ -61,9 +61,9 @@
         object = _ref[index];
         if (object[this.options.id_attribute] === updated_object.id) {
           if (object.status === "new") {
-            this.objects[index] = this.extend(updated_object("new"));
+            this.objects[index] = this.extend(updated_object, "new");
           } else {
-            this.objects[index] = this.extend(updated_object("dirty"));
+            this.objects[index] = this.extend(updated_object, "dirty");
           }
           return true;
         }
@@ -117,7 +117,7 @@
                   return this.extend(object);
                 }, this),
                 error: __bind(function() {
-                  this.extend(object("deleted"));
+                  this.extend(object, "deleted");
                   this.errors.push('Failed to delete.');
                   if (this.dirty_objects - this.errors.length === 0) {
                     return after_save();
@@ -141,7 +141,7 @@
                 }, this),
                 error: __bind(function() {
                   object[this.options.id_attribute] = temporary_id;
-                  this.extend(object("new"));
+                  this.extend(object, "new");
                   this.errors.push('Failed to create.');
                   if (this.dirty_objects - this.errors.length === 0) {
                     return after_save();
@@ -163,7 +163,7 @@
                   return this.extend(object);
                 }, this),
                 error: __bind(function() {
-                  this.extend(object("dirty"));
+                  this.extend(object, "dirty");
                   this.errors.push('Failed to update.');
                   if (this.dirty_objects - this.errors.length === 0) {
                     return after_save();

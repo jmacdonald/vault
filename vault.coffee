@@ -45,10 +45,10 @@ class Vault
     object[@options.id_attribute] = @date.getTime()
 
     # Extend the object with vault-specific variables and functions.
-    @extend object "new"
+    @extend object,"new"
 
     # Add the object to the collection.
-    @objects.push new_object
+    @objects.push object
 
   # Fetch an object in the collection using its id.
   fetch: (id) ->
@@ -64,9 +64,9 @@ class Vault
     for object, index in @objects
       if object[@options.id_attribute] == updated_object.id
         if object.status == "new"
-          @objects[index] = @extend updated_object "new"
+          @objects[index] = @extend updated_object,"new"
         else
-          @objects[index] = @extend updated_object "dirty"
+          @objects[index] = @extend updated_object,"dirty"
         return true
 
     # Object not found.
@@ -110,7 +110,7 @@ class Vault
             data: @strip object
             success: (data) => @extend object
             error: =>
-              @extend object "deleted"
+              @extend object,"deleted"
               @errors.push 'Failed to delete.'
               # Check to see if we're done.
               if @dirty_objects - @errors.length == 0
@@ -135,7 +135,7 @@ class Vault
               # Restore the temporary id, since the request failed.
               object[@options.id_attribute] = temporary_id
               
-              @extend object "new"
+              @extend object,"new"
               @errors.push 'Failed to create.'
               # Check to see if we're done.
               if @dirty_objects - @errors.length == 0
@@ -152,7 +152,7 @@ class Vault
             data: @strip object
             success: (data) => @extend object
             error: =>
-              @extend object "dirty"
+              @extend object,"dirty"
               @errors.push 'Failed to update.'
               # Check to see if we're done.
               if @dirty_objects - @errors.length == 0
