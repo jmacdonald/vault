@@ -53,11 +53,27 @@
       }
       return false;
     };
+    Vault.prototype.update = function(updated_object) {
+      var index, object, _len, _ref;
+      _ref = this.objects;
+      for (index = 0, _len = _ref.length; index < _len; index++) {
+        object = _ref[index];
+        if (object[this.options.id_attribute] === updated_object.id) {
+          if (object.status === "new") {
+            this.objects[index] = this.extend(updated_object("new"));
+          } else {
+            this.objects[index] = this.extend(updated_object("dirty"));
+          }
+          return true;
+        }
+      }
+      return false;
+    };
     Vault.prototype["delete"] = function(id) {
       var index, object, _len, _ref;
       _ref = this.objects;
-      for (object = 0, _len = _ref.length; object < _len; object++) {
-        index = _ref[object];
+      for (index = 0, _len = _ref.length; index < _len; index++) {
+        object = _ref[index];
         if (object[this.options.id_attribute] === id) {
           if (object.status === "new") {
             this.objects.splice(index, 1);

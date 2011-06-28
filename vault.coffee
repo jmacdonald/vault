@@ -58,9 +58,22 @@ class Vault
     # Object not found.
     return false
 
+  # Update an existing item in the collection.
+  update: (updated_object) ->
+    for object, index in @objects
+      if object[@options.id_attribute] == updated_object.id
+        if object.status == "new"
+          @objects[index] = @extend updated_object "new"
+        else
+          @objects[index] = @extend updated_object "dirty"
+        return true
+
+    # Object not found.
+    return false
+
   # Remove or flag an object in the collection for deletion, based on its status.
   delete: (id) ->
-    for index, object in @objects
+    for object, index in @objects
       if object[@options.id_attribute] == id
         if object.status == "new"
           @objects.splice(index, 1)
