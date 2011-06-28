@@ -4,12 +4,16 @@
   Vault = (function() {
     function Vault(name, urls, id_attribute, options) {
       var option, value;
+      if (id_attribute == null) {
+        id_attribute = "id";
+      }
       if (options == null) {
         options = {};
       }
       this.objects = [];
       this.dirty_objects = 0;
       this.errors = [];
+      this.date = new Date;
       this.name = name;
       this.urls = urls;
       this.id_attribute = id_attribute;
@@ -36,13 +40,13 @@
         }, this));
       }
     }
-    Vault.prototype.add = function(new_object) {
-      var new_object_index;
-      new_object_index = this.objects.push(new_object) - 1;
-      new_object.changed = true;
-      return new_object["delete"] = __bind(function() {
-        return this.objects.splice(new_object_index, 1);
+    Vault.prototype.add = function(object) {
+      object.id = this.date.getTime();
+      object.status = "new";
+      object["delete"] = __bind(function() {
+        return this["delete"](object.id);
       }, this);
+      return this.objects.push(new_object);
     };
     Vault.prototype.fetch = function(id) {
       var object, _i, _len, _ref;
@@ -61,7 +65,7 @@
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         object = _ref[_i];
         if (object[this.id_attribute] === id) {
-          object.deleted = true;
+          object.status = "deleted";
           return true;
         }
       }
@@ -87,65 +91,74 @@
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         object = _ref[_i];
-        _results.push(object.changed ? object.deleted ? $.ajax({
-          type: 'DELETE',
-          url: this.urls["delete"],
-          data: object,
-          success: function(data) {
-            return object.changed = false;
-          },
-          error: __bind(function() {
-            this.errors.push('Failed to delete.');
-            if (this.dirty_objects - this.errors.length === 0) {
-              return complete_callback();
-            }
-          }, this),
-          complete: function() {
-            if (this.dirty_objects - this.errors.length === 0) {
-              return complete_callback();
-            }
-          },
-          dataType: 'json'
-        }) : object[this.id_attribute] === void 0 ? $.ajax({
-          type: 'POST',
-          url: this.urls.create,
-          data: object,
-          success: __bind(function(data) {
-            object[this.id_attribute] = data.id;
-            return object.changed = false;
-          }, this),
-          error: __bind(function() {
-            this.errors.push('Failed to create.');
-            if (this.dirty_objects - this.errors.length === 0) {
-              return complete_callback();
-            }
-          }, this),
-          complete: function() {
-            if (this.dirty_objects - this.errors.length === 0) {
-              return complete_callback();
-            }
-          },
-          dataType: 'json'
-        }) : $.ajax({
-          type: 'POST',
-          url: this.urls.update,
-          data: object,
-          success: function(data) {
-            return object.changed = false;
-          },
-          error: __bind(function() {
-            this.errors.push('Failed to update.');
-            if (this.dirty_objects - this.errors.length === 0) {
-              return complete_callback();
-            }
-          }, this),
-          complete: function() {
-            if (this.dirty_objects - this.errors.length === 0) {
-              return complete_callback();
-            }
-          },
-          dataType: 'json'
-        }) : void 0);
+        _results.push((function() {
+          switch (object.status) {
+            case "deleted":
+              return $.ajax({
+                type: 'DELETE',
+                url: this.urls["delete"],
+                data: object,
+                success: function(data) {
+                  return object.changed = false;
+                },
+                error: __bind(function() {
+                  this.errors.push('Failed to delete.');
+                  if (this.dirty_objects - this.errors.length === 0) {
+                    return complete_callback();
+                  }
+                }, this),
+                complete: function() {
+                  if (this.dirty_objects - this.errors.length === 0) {
+                    return complete_callback();
+                  }
+                },
+                dataType: 'json'
+              });
+            case "new":
+              return $.ajax({
+                type: 'POST',
+                url: this.urls.create,
+                data: object,
+                success: __bind(function(data) {
+                  object[this.id_attribute] = data.id;
+                  return object.changed = false;
+                }, this),
+                error: __bind(function() {
+                  this.errors.push('Failed to create.');
+                  if (this.dirty_objects - this.errors.length === 0) {
+                    return complete_callback();
+                  }
+                }, this),
+                complete: function() {
+                  if (this.dirty_objects - this.errors.length === 0) {
+                    return complete_callback();
+                  }
+                },
+                dataType: 'json'
+              });
+            case "dirty":
+              return $.ajax({
+                type: 'POST',
+                url: this.urls.update,
+                data: object,
+                success: function(data) {
+                  return object.changed = false;
+                },
+                error: __bind(function() {
+                  this.errors.push('Failed to update.');
+                  if (this.dirty_objects - this.errors.length === 0) {
+                    return complete_callback();
+                  }
+                }, this),
+                complete: function() {
+                  if (this.dirty_objects - this.errors.length === 0) {
+                    return complete_callback();
+                  }
+                },
+                dataType: 'json'
+              });
+          }
+        }).call(this));
       }
       return _results;
     };

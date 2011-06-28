@@ -1,9 +1,13 @@
 class Vault
-  constructor: (name, urls, id_attribute, options = {}) ->
+  constructor: (name, urls, id_attribute = "id", options = {}) ->
     # Setup some internal variables.
     @objects = []
     @dirty_objects = 0
     @errors = []
+
+    # Create a date object which will be used to
+    # generate unique IDs for new records.
+    @date = new Date
 
     # Import required parameters for the data store.
     @name = name
@@ -35,14 +39,17 @@ class Vault
         @store()
 
   # Add a new item to the collection.
-  add: (new_object) ->
-    # Add the object to the collection.
-    new_object_index = @objects.push(new_object)-1
+  add: (object) ->
+    # Generate a temporary id and add it to the object.
+    object.id = @date.getTime()
 
     # Extend the object with vault-specific variables and functions.
-    new_object.changed = true
-    new_object.delete = =>
-      @objects.splice(new_object_index, 1)
+    object.status = "new"
+    object.delete = =>
+      @delete(object.id)
+
+    # Add the object to the collection.
+    @objects.push new_object
 
   # Fetch an object in the collection using its id.
   fetch: (id) ->
@@ -53,11 +60,14 @@ class Vault
     # Object not found.
     return false
 
-  # Flag an object in the collection for deletion, using its id.
+  # Remove or flag an object in the collection for deletion, based on its status.
   delete: (id) ->
-    for object in @objects
+    for index, object in @objects
       if object[@id_attribute] == id
-        object.deleted = true
+        if object.status == "new"
+          @objects.splice(index, 1)
+        else
+          object.status = "deleted"
         return true
 
     # Object not found.
@@ -80,8 +90,8 @@ class Vault
     # Sync the in-memory data store to the server.
     sync_error = false
     for object in @objects
-      if object.changed
-        if object.deleted
+      switch object.status
+        when "deleted" then
           $.ajax
             type: 'DELETE'
             url: @urls.delete
@@ -97,7 +107,7 @@ class Vault
               if @dirty_objects - @errors.length == 0
                 complete_callback()
             dataType: 'json'
-        else if object[@id_attribute] == undefined
+        when "new" then
           # This is a new object to be added.
           $.ajax
             type: 'POST'
@@ -116,7 +126,7 @@ class Vault
               if @dirty_objects - @errors.length == 0
                 complete_callback()
             dataType: 'json'
-        else
+        when "dirty" then
           # This is a pre-existing object to be updated.
           $.ajax
             type: 'POST'
