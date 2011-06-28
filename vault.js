@@ -60,12 +60,16 @@
       return false;
     };
     Vault.prototype["delete"] = function(id) {
-      var object, _i, _len, _ref;
+      var index, object, _len, _ref;
       _ref = this.objects;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        object = _ref[_i];
+      for (object = 0, _len = _ref.length; object < _len; object++) {
+        index = _ref[object];
         if (object[this.id_attribute] === id) {
-          object.status = "deleted";
+          if (object.status === "new") {
+            this.objects.splice(index, 1);
+          } else {
+            object.status = "deleted";
+          }
           return true;
         }
       }
@@ -179,13 +183,12 @@
           _ref = this.objects;
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             object = _ref[_i];
-            object.changed = false;
+            object.status = "clean";
             object.update = function() {
-              return this.changed = true;
+              return this.status = "dirty";
             };
             object["delete"] = function() {
-              this.changed = true;
-              return this.deleted = true;
+              return this.status = "deleted";
             };
           }
           this.dirty_objects = 0;

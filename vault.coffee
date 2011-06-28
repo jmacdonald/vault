@@ -91,7 +91,7 @@ class Vault
     sync_error = false
     for object in @objects
       switch object.status
-        when "deleted" then
+        when "deleted"
           $.ajax
             type: 'DELETE'
             url: @urls.delete
@@ -107,7 +107,7 @@ class Vault
               if @dirty_objects - @errors.length == 0
                 complete_callback()
             dataType: 'json'
-        when "new" then
+        when "new"
           # This is a new object to be added.
           $.ajax
             type: 'POST'
@@ -126,7 +126,7 @@ class Vault
               if @dirty_objects - @errors.length == 0
                 complete_callback()
             dataType: 'json'
-        when "dirty" then
+        when "dirty"
           # This is a pre-existing object to be updated.
           $.ajax
             type: 'POST'
@@ -160,12 +160,11 @@ class Vault
 
         # Extend the objects with vault-specific variables and functions.
         for object in @objects
-          object.changed = false
+          object.status = "clean"
           object.update = ->
-            this.changed = true
+            this.status = "dirty"
           object.delete = ->
-            this.changed = true
-            this.deleted = true
+            this.status = "deleted"
 
         # Reset the count of dirty objects.
         @dirty_objects = 0
