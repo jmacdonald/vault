@@ -41,8 +41,10 @@ class Vault
 
   # Add a new item to the collection.
   add: (object) ->
-    # Generate a temporary id and add it to the object.
-    object[@options.id_attribute] = @date.getTime()
+
+    # If the object has no id, generate a temporary one and add it to the object.
+    if object[@options.id_attribute]?
+      object[@options.id_attribute] = @date.getTime()
 
     # Extend the object with vault-specific variables and functions.
     @extend object,"new"
