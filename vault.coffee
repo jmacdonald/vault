@@ -50,6 +50,9 @@ class Vault
     # Add the object to the collection.
     @objects.push object
 
+    # Return the extended object.
+    return object
+
   # Fetch an object in the collection using its id.
   fetch: (id) ->
     for object in @objects

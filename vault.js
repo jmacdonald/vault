@@ -41,7 +41,8 @@
     Vault.prototype.add = function(object) {
       object[this.options.id_attribute] = this.date.getTime();
       this.extend(object, "new");
-      return this.objects.push(object);
+      this.objects.push(object);
+      return object;
     };
     Vault.prototype.fetch = function(id) {
       var object, _i, _len, _ref;
