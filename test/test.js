@@ -15,8 +15,11 @@ var cars = new Vault('cars', urls, {after_load: function() {
                 year: 2008
             });
             expect(cars.objects.length).toEqual(4);
+        });
 
+        it('can add objects with a specified id', function () {
             new_car_2 = cars.add({
+                id: 12,
                 make: "Tesla",
                 model: "Roadster",
                 year: 2009
@@ -26,6 +29,10 @@ var cars = new Vault('cars', urls, {after_load: function() {
 
         it('can read new objects', function () {
             expect(cars.fetch(new_car.id).model).toEqual("Viper SRT-10");
+        });
+
+        it('can read new objects with a specified id', function () {
+            expect(cars.fetch(12).model).toEqual("Roadster");
         });
 
         it('can read existing objects', function () {
@@ -96,7 +103,7 @@ var cars = new Vault('cars', urls, {after_load: function() {
         });
 
         it('can remove new objects via methods', function () {
-            cars.delete(new_car_2.id);
+            cars.delete(12);
 
             expect(cars.objects.length).toEqual(3);
         });

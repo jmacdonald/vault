@@ -39,7 +39,7 @@
       }
     }
     Vault.prototype.add = function(object) {
-      if (object[this.options.id_attribute] != null) {
+      if (object[this.options.id_attribute] == null) {
         object[this.options.id_attribute] = this.date.getTime();
       }
       this.extend(object, "new");

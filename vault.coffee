@@ -43,7 +43,7 @@ class Vault
   add: (object) ->
 
     # If the object has no id, generate a temporary one and add it to the object.
-    if object[@options.id_attribute]?
+    unless object[@options.id_attribute]?
       object[@options.id_attribute] = @date.getTime()
 
     # Extend the object with vault-specific variables and functions.
