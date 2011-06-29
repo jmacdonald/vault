@@ -32,7 +32,7 @@ Add an object to the collection.
 
 * *object* The new object to be added.
 
-*Note:* A unique id will be assigned to the new object, and will be superseded by a real id generated server-side after a successful save.
+*Note:* If an id hasn't already been assigned to the object, a unique one will be generated and assigned to the new object, and will be superseded by a real id generated server-side after a successful save.
 
 h3. fetch(id)
 
