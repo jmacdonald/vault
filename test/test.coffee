@@ -16,6 +16,7 @@ cars = new Vault 'cars', urls,
           year: 2008
 
         expect(cars.objects.length).toEqual(4)
+        expect(cars.dirty_object_count).toEqual(1)
 
       it 'can add objects with a specified id', ->
         new_car_2 = cars.add
@@ -25,6 +26,7 @@ cars = new Vault 'cars', urls,
           year: 2009
 
         expect(cars.objects.length).toEqual(5)
+        expect(cars.dirty_object_count).toEqual(2)
 
       it 'can read new objects', ->
         expect(cars.fetch(new_car.id).model).toEqual("Viper SRT-10")
@@ -46,19 +48,7 @@ cars = new Vault 'cars', urls,
         expect(cars.fetch(new_car.id).year).toEqual(2009)
         expect(cars.fetch(new_car.id).status).toEqual('new')
         expect(cars.objects.length).toEqual(5)
-
-      it 'can update new objects via method', ->
-        cars.update
-          id: new_car.id,
-          make: "Subaru",
-          model: "Impreza WRX STI",
-          year: 2011
-
-        expect(cars.fetch(new_car.id).make).toEqual("Subaru")
-        expect(cars.fetch(new_car.id).model).toEqual("Impreza WRX STI")
-        expect(cars.fetch(new_car.id).year).toEqual(2011)
-        expect(cars.fetch(new_car.id).status).toEqual('new')
-        expect(cars.objects.length).toEqual(5)
+        expect(cars.dirty_object_count).toEqual(2)
 
       it 'can update existing objects via instances', ->
         car = cars.fetch(1)
@@ -72,19 +62,7 @@ cars = new Vault 'cars', urls,
         expect(cars.fetch(1).year).toEqual(2002)
         expect(cars.fetch(1).status).toEqual('dirty')
         expect(cars.objects.length).toEqual(5)
-
-      it 'can update existing objects via method', ->
-        cars.update
-          id: 3,
-          make: "Honda",
-          model: "NSX",
-          year: 2005
-
-        expect(cars.fetch(3).make).toEqual("Honda")
-        expect(cars.fetch(3).model).toEqual("NSX")
-        expect(cars.fetch(3).year).toEqual(2005)
-        expect(cars.fetch(3).status).toEqual('dirty')
-        expect(cars.objects.length).toEqual(5)
+        expect(cars.dirty_object_count).toEqual(3)
 
       it 'can strip new objects', ->
         stripped_object = cars.strip(new_car)
@@ -129,3 +107,8 @@ cars = new Vault 'cars', urls,
 
         expect(cars.objects.length).toEqual(3)
         expect(cars.fetch(3).status).toEqual('deleted')
+
+      it 'can synchronize properly', ->
+        cars.synchronize()
+
+        expect(cars.objects.length).toEqual(1)

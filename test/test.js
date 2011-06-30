@@ -16,7 +16,8 @@
             model: "Viper SRT-10",
             year: 2008
           });
-          return expect(cars.objects.length).toEqual(4);
+          expect(cars.objects.length).toEqual(4);
+          return expect(cars.dirty_object_count).toEqual(1);
         });
         it('can add objects with a specified id', function() {
           new_car_2 = cars.add({
@@ -25,7 +26,8 @@
             model: "Roadster",
             year: 2009
           });
-          return expect(cars.objects.length).toEqual(5);
+          expect(cars.objects.length).toEqual(5);
+          return expect(cars.dirty_object_count).toEqual(2);
         });
         it('can read new objects', function() {
           return expect(cars.fetch(new_car.id).model).toEqual("Viper SRT-10");
@@ -45,20 +47,8 @@
           expect(cars.fetch(new_car.id).model).toEqual("Murcielago");
           expect(cars.fetch(new_car.id).year).toEqual(2009);
           expect(cars.fetch(new_car.id).status).toEqual('new');
-          return expect(cars.objects.length).toEqual(5);
-        });
-        it('can update new objects via method', function() {
-          cars.update({
-            id: new_car.id,
-            make: "Subaru",
-            model: "Impreza WRX STI",
-            year: 2011
-          });
-          expect(cars.fetch(new_car.id).make).toEqual("Subaru");
-          expect(cars.fetch(new_car.id).model).toEqual("Impreza WRX STI");
-          expect(cars.fetch(new_car.id).year).toEqual(2011);
-          expect(cars.fetch(new_car.id).status).toEqual('new');
-          return expect(cars.objects.length).toEqual(5);
+          expect(cars.objects.length).toEqual(5);
+          return expect(cars.dirty_object_count).toEqual(2);
         });
         it('can update existing objects via instances', function() {
           var car;
@@ -71,20 +61,8 @@
           expect(cars.fetch(1).model).toEqual("Supra");
           expect(cars.fetch(1).year).toEqual(2002);
           expect(cars.fetch(1).status).toEqual('dirty');
-          return expect(cars.objects.length).toEqual(5);
-        });
-        it('can update existing objects via method', function() {
-          cars.update({
-            id: 3,
-            make: "Honda",
-            model: "NSX",
-            year: 2005
-          });
-          expect(cars.fetch(3).make).toEqual("Honda");
-          expect(cars.fetch(3).model).toEqual("NSX");
-          expect(cars.fetch(3).year).toEqual(2005);
-          expect(cars.fetch(3).status).toEqual('dirty');
-          return expect(cars.objects.length).toEqual(5);
+          expect(cars.objects.length).toEqual(5);
+          return expect(cars.dirty_object_count).toEqual(3);
         });
         it('can strip new objects', function() {
           var key, stripped_object, value;
@@ -128,10 +106,14 @@
           expect(cars.objects.length).toEqual(3);
           return expect(car.status).toEqual('deleted');
         });
-        return it('can remove existing objects via methods', function() {
+        it('can remove existing objects via methods', function() {
           cars["delete"](3);
           expect(cars.objects.length).toEqual(3);
           return expect(cars.fetch(3).status).toEqual('deleted');
+        });
+        return it('can synchronize properly', function() {
+          cars.synchronize();
+          return expect(cars.objects.length).toEqual(1);
         });
       });
     }

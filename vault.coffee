@@ -52,6 +52,9 @@ class Vault
     # Add the object to the collection.
     @objects.push object
 
+    # Increase the count of dirty objects.
+    @dirty_object_count++
+
     # Return the extended object.
     return object
 
@@ -65,26 +68,33 @@ class Vault
     return false
 
   # Update an existing item in the collection.
-  update: (updated_object) ->
+  update: (id) ->
     for object, index in @objects
-      if object[@options.id_attribute] == updated_object.id
-        if object.status is "new"
-          @objects[index] = @extend updated_object,"new"
-        else
-          @objects[index] = @extend updated_object,"dirty"
+      if object[@options.id_attribute] == id
+        if object.status is "clean"
+          object.status = "dirty"
+          @dirty_object_count++
         return true
 
     # Object not found.
     return false
 
-  # Remove or flag an object in the collection for deletion, based on its status.
-  delete: (id, destroy = false) ->
+  # Flag an object in the collection for deletion,
+  # or if the object is new, remove it.
+  delete: (id) ->
     for object, index in @objects
       if object[@options.id_attribute] == id
-        if object.status is "new" or destroy
-          @objects.splice(index, 1)
-        else
-          object.status = "deleted"
+        switch object.status
+          when "new"
+            # New objects are special; we essentially want to
+            # reverse the steps taken during the add operation.
+            @objects.splice(index, 1)
+            @dirty_object_count--
+          when "clean"
+            object.status = "deleted"
+            @dirty_object_count++
+          when "dirty"
+            object.status = "deleted"
         return true
 
     # Object not found.
@@ -106,48 +116,42 @@ class Vault
 
     # Sync the in-memory data store to the server.
     sync_error = false
-    for object in @objects
+    for object, index in @objects
       switch object.status
         when "deleted"
           $.ajax
             type: 'DELETE'
             url: @urls.delete
             data: @strip object
-            success: (data) => object.delete true
-            error: =>
-              @extend object,"deleted"
-              @errors.push 'Failed to delete.'
+            fixture: (settings) ->
+              return true
+            success: (data) =>
+              # Removed the deleted object from the collection.
+              @objects.splice(index, 1)
+              @dirty_object_count--
+            error: => @errors.push 'Failed to delete.'
+            complete: =>
               # Check to see if we're done.
               if @dirty_object_count - @errors.length is 0
                 after_save()
-            complete: ->
-              # Check to see if we're done.
-              if --@dirty_object_count - @errors.length is 0
-                after_save()
             dataType: 'json'
         when "new"
-          # Store the temporary id so that we can restore
-          # it in case this request fails.
-          temporary_id = object.id
           $.ajax
             type: 'POST'
             url: @urls.create
             data: @strip object
+            fixture: (settings) =>
+              settings.data.id = @date.getTime()
+
+              return settings.data
             success: (data) =>
               # Replace the existing object with the new one from the server and extend it.
-              object = @extend data
-            error: =>
-              # Restore the temporary id, since the request failed.
-              object[@options.id_attribute] = temporary_id
-              
-              @extend object,"new"
-              @errors.push 'Failed to create.'
+              object = @extend data # This will also set its status to clean.
+              @dirty_object_count--
+            error: => @errors.push 'Failed to create.'
+            complete: =>
               # Check to see if we're done.
               if @dirty_object_count - @errors.length is 0
-                after_save()
-            complete: ->
-              # Check to see if we're done.
-              if --@dirty_object_count - @errors.length is 0
                 after_save()
             dataType: 'json'
         when "dirty"
@@ -155,16 +159,15 @@ class Vault
             type: 'POST'
             url: @urls.update
             data: @strip object
-            success: (data) => object.status = "clean"
-            error: =>
-              @extend object,"dirty"
-              @errors.push 'Failed to update.'
+            fixture: (settings) ->
+              return true
+            success: (data) =>
+              object.status = "clean"
+              @dirty_object_count--
+            error: => @errors.push 'Failed to update.'
+            complete: =>
               # Check to see if we're done.
               if @dirty_object_count - @errors.length is 0
-                after_save()
-            complete: ->
-              # Check to see if we're done.
-              if --@dirty_object_count - @errors.length is 0
                 after_save()
             dataType: 'json'
   
@@ -204,7 +207,7 @@ class Vault
       @errors.push 'Cannot synchronize, navigator is offline.'
       return after_sync()
 
-    @save ->
+    @save =>
       if @errors.length is 0
         @reload(after_sync)
       else
@@ -236,11 +239,10 @@ class Vault
   # Extend an object with vault-specific variables and functions.
   extend: (object, status="clean") ->
     object.status = status
-    object.update = ->
-      unless this.status is "new"
-        this.status = "dirty"
+    object.update = =>
+      @update(object.id)
     object.delete = (destroy = false) =>
-      @delete(object.id, destroy)
+      @delete(object.id)
 
     return object
 

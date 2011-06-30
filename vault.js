@@ -44,6 +44,7 @@
       }
       this.extend(object, "new");
       this.objects.push(object);
+      this.dirty_object_count++;
       return object;
     };
     Vault.prototype.fetch = function(id) {
@@ -57,35 +58,38 @@
       }
       return false;
     };
-    Vault.prototype.update = function(updated_object) {
+    Vault.prototype.update = function(id) {
       var index, object, _len, _ref;
       _ref = this.objects;
       for (index = 0, _len = _ref.length; index < _len; index++) {
         object = _ref[index];
-        if (object[this.options.id_attribute] === updated_object.id) {
-          if (object.status === "new") {
-            this.objects[index] = this.extend(updated_object, "new");
-          } else {
-            this.objects[index] = this.extend(updated_object, "dirty");
+        if (object[this.options.id_attribute] === id) {
+          if (object.status === "clean") {
+            object.status = "dirty";
+            this.dirty_object_count++;
           }
           return true;
         }
       }
       return false;
     };
-    Vault.prototype["delete"] = function(id, destroy) {
+    Vault.prototype["delete"] = function(id) {
       var index, object, _len, _ref;
-      if (destroy == null) {
-        destroy = false;
-      }
       _ref = this.objects;
       for (index = 0, _len = _ref.length; index < _len; index++) {
         object = _ref[index];
         if (object[this.options.id_attribute] === id) {
-          if (object.status === "new" || destroy) {
-            this.objects.splice(index, 1);
-          } else {
-            object.status = "deleted";
+          switch (object.status) {
+            case "new":
+              this.objects.splice(index, 1);
+              this.dirty_object_count--;
+              break;
+            case "clean":
+              object.status = "deleted";
+              this.dirty_object_count++;
+              break;
+            case "dirty":
+              object.status = "deleted";
           }
           return true;
         }
@@ -93,7 +97,7 @@
       return false;
     };
     Vault.prototype.save = function(after_save) {
-      var object, sync_error, temporary_id, _i, _len, _ref, _results;
+      var index, object, sync_error, _len, _ref, _results;
       if (after_save == null) {
         after_save = function() {};
       }
@@ -110,8 +114,8 @@
       sync_error = false;
       _ref = this.objects;
       _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        object = _ref[_i];
+      for (index = 0, _len = _ref.length; index < _len; index++) {
+        object = _ref[index];
         _results.push((function() {
           switch (object.status) {
             case "deleted":
@@ -119,45 +123,44 @@
                 type: 'DELETE',
                 url: this.urls["delete"],
                 data: this.strip(object),
+                fixture: function(settings) {
+                  return true;
+                },
                 success: __bind(function(data) {
-                  return object["delete"](true);
+                  this.objects.splice(index, 1);
+                  return this.dirty_object_count--;
                 }, this),
                 error: __bind(function() {
-                  this.extend(object, "deleted");
-                  this.errors.push('Failed to delete.');
+                  return this.errors.push('Failed to delete.');
+                }, this),
+                complete: __bind(function() {
                   if (this.dirty_object_count - this.errors.length === 0) {
                     return after_save();
                   }
                 }, this),
-                complete: function() {
-                  if (--this.dirty_object_count - this.errors.length === 0) {
-                    return after_save();
-                  }
-                },
                 dataType: 'json'
               });
             case "new":
-              temporary_id = object.id;
               return $.ajax({
                 type: 'POST',
                 url: this.urls.create,
                 data: this.strip(object),
+                fixture: __bind(function(settings) {
+                  settings.data.id = this.date.getTime();
+                  return settings.data;
+                }, this),
                 success: __bind(function(data) {
-                  return object = this.extend(data);
+                  object = this.extend(data);
+                  return this.dirty_object_count--;
                 }, this),
                 error: __bind(function() {
-                  object[this.options.id_attribute] = temporary_id;
-                  this.extend(object, "new");
-                  this.errors.push('Failed to create.');
+                  return this.errors.push('Failed to create.');
+                }, this),
+                complete: __bind(function() {
                   if (this.dirty_object_count - this.errors.length === 0) {
                     return after_save();
                   }
                 }, this),
-                complete: function() {
-                  if (--this.dirty_object_count - this.errors.length === 0) {
-                    return after_save();
-                  }
-                },
                 dataType: 'json'
               });
             case "dirty":
@@ -165,21 +168,21 @@
                 type: 'POST',
                 url: this.urls.update,
                 data: this.strip(object),
+                fixture: function(settings) {
+                  return true;
+                },
                 success: __bind(function(data) {
-                  return object.status = "clean";
+                  object.status = "clean";
+                  return this.dirty_object_count--;
                 }, this),
                 error: __bind(function() {
-                  this.extend(object, "dirty");
-                  this.errors.push('Failed to update.');
+                  return this.errors.push('Failed to update.');
+                }, this),
+                complete: __bind(function() {
                   if (this.dirty_object_count - this.errors.length === 0) {
                     return after_save();
                   }
                 }, this),
-                complete: function() {
-                  if (--this.dirty_object_count - this.errors.length === 0) {
-                    return after_save();
-                  }
-                },
                 dataType: 'json'
               });
           }
@@ -223,13 +226,13 @@
         this.errors.push('Cannot synchronize, navigator is offline.');
         return after_sync();
       }
-      return this.save(function() {
+      return this.save(__bind(function() {
         if (this.errors.length === 0) {
           return this.reload(after_sync);
         } else {
           return after_sync();
         }
-      });
+      }, this));
     };
     Vault.prototype.load = function() {
       if (!this.options.offline) {
@@ -254,16 +257,14 @@
         status = "clean";
       }
       object.status = status;
-      object.update = function() {
-        if (this.status !== "new") {
-          return this.status = "dirty";
-        }
-      };
+      object.update = __bind(function() {
+        return this.update(object.id);
+      }, this);
       object["delete"] = __bind(function(destroy) {
         if (destroy == null) {
           destroy = false;
         }
-        return this["delete"](object.id, destroy);
+        return this["delete"](object.id);
       }, this);
       return object;
     };
