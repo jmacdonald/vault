@@ -109,6 +109,5 @@ cars = new Vault 'cars', urls,
         expect(cars.fetch(3).status).toEqual('deleted')
 
       it 'can synchronize properly', ->
-        cars.synchronize()
-
-        expect(cars.objects.length).toEqual(1)
+        cars.synchronize ->
+          expect(cars.objects.length).toEqual(1)

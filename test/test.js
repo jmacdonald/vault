@@ -112,8 +112,9 @@
           return expect(cars.fetch(3).status).toEqual('deleted');
         });
         return it('can synchronize properly', function() {
-          cars.synchronize();
-          return expect(cars.objects.length).toEqual(1);
+          return cars.synchronize(function() {
+            return expect(cars.objects.length).toEqual(1);
+          });
         });
       });
     }
