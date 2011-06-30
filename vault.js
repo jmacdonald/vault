@@ -73,13 +73,16 @@
       }
       return false;
     };
-    Vault.prototype["delete"] = function(id) {
+    Vault.prototype["delete"] = function(id, destroy) {
       var index, object, _len, _ref;
+      if (destroy == null) {
+        destroy = false;
+      }
       _ref = this.objects;
       for (index = 0, _len = _ref.length; index < _len; index++) {
         object = _ref[index];
         if (object[this.options.id_attribute] === id) {
-          if (object.status === "new") {
+          if (object.status === "new" || destroy) {
             this.objects.splice(index, 1);
           } else {
             object.status = "deleted";
@@ -117,7 +120,7 @@
                 url: this.urls["delete"],
                 data: this.strip(object),
                 success: __bind(function(data) {
-                  return this.extend(object);
+                  return object["delete"](true);
                 }, this),
                 error: __bind(function() {
                   this.extend(object, "deleted");
@@ -163,7 +166,7 @@
                 url: this.urls.update,
                 data: this.strip(object),
                 success: __bind(function(data) {
-                  return this.extend(object);
+                  return object.status = "clean";
                 }, this),
                 error: __bind(function() {
                   this.extend(object, "dirty");
@@ -256,8 +259,11 @@
           return this.status = "dirty";
         }
       };
-      object["delete"] = __bind(function() {
-        return this["delete"](object.id);
+      object["delete"] = __bind(function(destroy) {
+        if (destroy == null) {
+          destroy = false;
+        }
+        return this["delete"](object.id, destroy);
       }, this);
       return object;
     };

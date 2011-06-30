@@ -78,10 +78,10 @@ class Vault
     return false
 
   # Remove or flag an object in the collection for deletion, based on its status.
-  delete: (id) ->
+  delete: (id, destroy = false) ->
     for object, index in @objects
       if object[@options.id_attribute] == id
-        if object.status == "new"
+        if object.status == "new" or destroy
           @objects.splice(index, 1)
         else
           object.status = "deleted"
@@ -113,7 +113,7 @@ class Vault
             type: 'DELETE'
             url: @urls.delete
             data: @strip object
-            success: (data) => @extend object
+            success: (data) => object.delete true
             error: =>
               @extend object,"deleted"
               @errors.push 'Failed to delete.'
@@ -155,7 +155,7 @@ class Vault
             type: 'POST'
             url: @urls.update
             data: @strip object
-            success: (data) => @extend object
+            success: (data) => object.status = "clean"
             error: =>
               @extend object,"dirty"
               @errors.push 'Failed to update.'
@@ -239,8 +239,8 @@ class Vault
     object.update = ->
       unless this.status == "new"
         this.status = "dirty"
-    object.delete = =>
-      @delete(object.id)
+    object.delete = (destroy = false) =>
+      @delete(object.id, destroy)
 
     return object
 
