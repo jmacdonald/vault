@@ -1,3 +1,5 @@
+!https://github.com/cityofgreatersudbury/vault/raw/master/swag/vault.png!
+
 h1. Vault
 
 CoffeeScript/JavaScript online/offline data store.
