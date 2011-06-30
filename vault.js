@@ -8,7 +8,7 @@
         options = {};
       }
       this.objects = [];
-      this.dirty_objects = 0;
+      this.dirty_object_count = 0;
       this.errors = [];
       this.date = new Date;
       this.name = name;
@@ -97,11 +97,11 @@
       if (after_save == null) {
         after_save = function() {};
       }
-      if (!(navigator.onLine && this.dirty_objects !== 0)) {
+      if (!navigator.onLine || this.dirty_object_count === 0) {
         if (!navigator.onLine) {
           this.errors.push('Cannot reload, navigator is offline.');
         }
-        if (this.dirty_objects === 0) {
+        if (this.dirty_object_count === 0) {
           this.errors.push('Nothing to sync.');
         }
         return after_save();
@@ -125,12 +125,12 @@
                 error: __bind(function() {
                   this.extend(object, "deleted");
                   this.errors.push('Failed to delete.');
-                  if (this.dirty_objects - this.errors.length === 0) {
+                  if (this.dirty_object_count - this.errors.length === 0) {
                     return after_save();
                   }
                 }, this),
                 complete: function() {
-                  if (this.dirty_objects - this.errors.length === 0) {
+                  if (this.dirty_object_count - this.errors.length === 0) {
                     return after_save();
                   }
                 },
@@ -149,12 +149,12 @@
                   object[this.options.id_attribute] = temporary_id;
                   this.extend(object, "new");
                   this.errors.push('Failed to create.');
-                  if (this.dirty_objects - this.errors.length === 0) {
+                  if (this.dirty_object_count - this.errors.length === 0) {
                     return after_save();
                   }
                 }, this),
                 complete: function() {
-                  if (this.dirty_objects - this.errors.length === 0) {
+                  if (this.dirty_object_count - this.errors.length === 0) {
                     return after_save();
                   }
                 },
@@ -171,12 +171,12 @@
                 error: __bind(function() {
                   this.extend(object, "dirty");
                   this.errors.push('Failed to update.');
-                  if (this.dirty_objects - this.errors.length === 0) {
+                  if (this.dirty_object_count - this.errors.length === 0) {
                     return after_save();
                   }
                 }, this),
                 complete: function() {
-                  if (this.dirty_objects - this.errors.length === 0) {
+                  if (this.dirty_object_count - this.errors.length === 0) {
                     return after_save();
                   }
                 },
@@ -206,7 +206,7 @@
             object = _ref[_i];
             this.extend(object);
           }
-          this.dirty_objects = 0;
+          this.dirty_object_count = 0;
           return after_load();
         }, this),
         error: __bind(function() {

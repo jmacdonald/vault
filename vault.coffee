@@ -2,7 +2,7 @@ class Vault
   constructor: (name, urls, options = {}) ->
     # Setup some internal variables.
     @objects = []
-    @dirty_objects = 0
+    @dirty_object_count = 0
     @errors = []
 
     # Create a date object which will be used to
@@ -68,7 +68,7 @@ class Vault
   update: (updated_object) ->
     for object, index in @objects
       if object[@options.id_attribute] == updated_object.id
-        if object.status == "new"
+        if object.status is "new"
           @objects[index] = @extend updated_object,"new"
         else
           @objects[index] = @extend updated_object,"dirty"
@@ -81,7 +81,7 @@ class Vault
   delete: (id, destroy = false) ->
     for object, index in @objects
       if object[@options.id_attribute] == id
-        if object.status == "new" or destroy
+        if object.status is "new" or destroy
           @objects.splice(index, 1)
         else
           object.status = "deleted"
@@ -93,10 +93,10 @@ class Vault
   # Write local changes back to the server, using per-object requests.
   save: (after_save = ->) ->
     # Don't bother if we're offline or there's nothing to sync.
-    unless navigator.onLine and @dirty_objects != 0
-      unless navigator.onLine
+    if not navigator.onLine or @dirty_object_count is 0
+      if not navigator.onLine
         @errors.push 'Cannot reload, navigator is offline.'
-      unless @dirty_objects != 0
+      if @dirty_object_count is 0
         @errors.push 'Nothing to sync.'
       return after_save()
 
@@ -118,11 +118,11 @@ class Vault
               @extend object,"deleted"
               @errors.push 'Failed to delete.'
               # Check to see if we're done.
-              if @dirty_objects - @errors.length == 0
+              if @dirty_object_count - @errors.length is 0
                 after_save()
             complete: ->
               # Check to see if we're done.
-              if @dirty_objects - @errors.length == 0
+              if @dirty_object_count - @errors.length is 0
                 after_save()
             dataType: 'json'
         when "new"
@@ -143,11 +143,11 @@ class Vault
               @extend object,"new"
               @errors.push 'Failed to create.'
               # Check to see if we're done.
-              if @dirty_objects - @errors.length == 0
+              if @dirty_object_count - @errors.length is 0
                 after_save()
             complete: ->
               # Check to see if we're done.
-              if @dirty_objects - @errors.length == 0
+              if @dirty_object_count - @errors.length is 0
                 after_save()
             dataType: 'json'
         when "dirty"
@@ -160,11 +160,11 @@ class Vault
               @extend object,"dirty"
               @errors.push 'Failed to update.'
               # Check to see if we're done.
-              if @dirty_objects - @errors.length == 0
+              if @dirty_object_count - @errors.length is 0
                 after_save()
             complete: ->
               # Check to see if we're done.
-              if @dirty_objects - @errors.length == 0
+              if @dirty_object_count - @errors.length is 0
                 after_save()
             dataType: 'json'
   
@@ -187,7 +187,7 @@ class Vault
           @extend object
 
         # Reset the count of dirty objects.
-        @dirty_objects = 0
+        @dirty_object_count = 0
 
         # Call the callback function as the reload is complete.
         after_load()
@@ -205,7 +205,7 @@ class Vault
       return after_sync()
 
     @save ->
-      if @errors.length == 0
+      if @errors.length is 0
         @reload(after_sync)
       else
         after_sync()
@@ -237,7 +237,7 @@ class Vault
   extend: (object, status="clean") ->
     object.status = status
     object.update = ->
-      unless this.status == "new"
+      unless this.status is "new"
         this.status = "dirty"
     object.delete = (destroy = false) =>
       @delete(object.id, destroy)
@@ -250,7 +250,7 @@ class Vault
     object_clone = @clone object
 
     # Remove the temporary id given to new objects.
-    if object_clone.status == "new"
+    if object_clone.status is "new"
       delete object_clone[@options.id_attribute]
     
     delete object_clone.status
