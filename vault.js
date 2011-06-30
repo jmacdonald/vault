@@ -262,12 +262,26 @@
       return object;
     };
     Vault.prototype.strip = function(object) {
-      if (object.status === "new") {
-        delete object[this.options.id_attribute];
+      var object_clone;
+      object_clone = this.clone(object);
+      if (object_clone.status === "new") {
+        delete object_clone[this.options.id_attribute];
       }
-      delete object.status;
-      delete object.update;
-      return delete object["delete"];
+      delete object_clone.status;
+      delete object_clone.update;
+      delete object_clone["delete"];
+      return object_clone;
+    };
+    Vault.prototype.clone = function(object) {
+      var key, new_instance;
+      if (!((object != null) && typeof object === 'object')) {
+        return object;
+      }
+      new_instance = new object.constructor();
+      for (key in object) {
+        new_instance[key] = this.clone(object[key]);
+      }
+      return new_instance;
     };
     window.Vault = Vault;
     return Vault;

@@ -87,26 +87,23 @@ cars = new Vault 'cars', urls,
         expect(cars.objects.length).toEqual(5)
 
       it 'can strip new objects', ->
-        cars.strip(new_car)
+        stripped_object = cars.strip(new_car)
 
-        for key, value of new_car # TODO: Verify in other direction.
+        for key, value of stripped_object
           expect(['make', 'model', 'year']).toContain key
         expect(cars.objects.length).toEqual(5)
 
-        # Extend the object since it's required later on.
-        cars.extend new_car,"new"
-
       it 'can strip new objects with a specified id', ->
-        cars.strip(new_car_2)
+        stripped_object = cars.strip(new_car_2)
 
-        for key, value of new_car_2 # TODO: Verify in other direction.
+        for key, value of stripped_object
           expect(['make', 'model', 'year']).toContain key
         expect(cars.objects.length).toEqual(5)
 
       it 'can strip existing objects', ->
-        cars.strip(cars.fetch(3))
+        stripped_object = cars.strip(cars.fetch(3))
 
-        for key, value of cars.fetch(3) # TODO: Verify in other direction.
+        for key, value of stripped_object
           expect(['id', 'make', 'model', 'year']).toContain key
         expect(cars.objects.length).toEqual(5)
 

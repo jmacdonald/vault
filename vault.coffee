@@ -244,15 +244,32 @@ class Vault
 
     return object
 
-  # Remove vault-specific variables and functions applied to an object.
+  # Return a copy of an object with vault-specific variables and functions removed.
   strip: (object) ->
+    # Clone the object so that we don't strip the original.
+    object_clone = @clone object
+
     # Remove the temporary id given to new objects.
-    if object.status == "new"
-      delete object[@options.id_attribute]
+    if object_clone.status == "new"
+      delete object_clone[@options.id_attribute]
     
-    delete object.status
-    delete object.update
-    delete object.delete
+    delete object_clone.status
+    delete object_clone.update
+    delete object_clone.delete
+
+    return object_clone
+
+  # Clone (deep copy) an object.
+  clone: (object) ->
+    unless object? and typeof object is 'object'
+      return object
+
+    new_instance = new object.constructor()
+
+    for key of object
+      new_instance[key] = @clone object[key]
+
+    return new_instance
 
   # Attach the Vault class to the window so that it can be used by other scripts.
   window.Vault = this

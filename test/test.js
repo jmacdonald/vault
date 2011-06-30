@@ -87,30 +87,28 @@
           return expect(cars.objects.length).toEqual(5);
         });
         it('can strip new objects', function() {
-          var key, value;
-          cars.strip(new_car);
-          for (key in new_car) {
-            value = new_car[key];
+          var key, stripped_object, value;
+          stripped_object = cars.strip(new_car);
+          for (key in stripped_object) {
+            value = stripped_object[key];
             expect(['make', 'model', 'year']).toContain(key);
           }
-          expect(cars.objects.length).toEqual(5);
-          return cars.extend(new_car, "new");
+          return expect(cars.objects.length).toEqual(5);
         });
         it('can strip new objects with a specified id', function() {
-          var key, value;
-          cars.strip(new_car_2);
-          for (key in new_car_2) {
-            value = new_car_2[key];
+          var key, stripped_object, value;
+          stripped_object = cars.strip(new_car_2);
+          for (key in stripped_object) {
+            value = stripped_object[key];
             expect(['make', 'model', 'year']).toContain(key);
           }
           return expect(cars.objects.length).toEqual(5);
         });
         it('can strip existing objects', function() {
-          var key, value, _ref;
-          cars.strip(cars.fetch(3));
-          _ref = cars.fetch(3);
-          for (key in _ref) {
-            value = _ref[key];
+          var key, stripped_object, value;
+          stripped_object = cars.strip(cars.fetch(3));
+          for (key in stripped_object) {
+            value = stripped_object[key];
             expect(['id', 'make', 'model', 'year']).toContain(key);
           }
           return expect(cars.objects.length).toEqual(5);
