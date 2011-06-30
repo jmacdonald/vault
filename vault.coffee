@@ -122,7 +122,7 @@ class Vault
                 after_save()
             complete: ->
               # Check to see if we're done.
-              if @dirty_object_count - @errors.length is 0
+              if --@dirty_object_count - @errors.length is 0
                 after_save()
             dataType: 'json'
         when "new"
@@ -147,7 +147,7 @@ class Vault
                 after_save()
             complete: ->
               # Check to see if we're done.
-              if @dirty_object_count - @errors.length is 0
+              if --@dirty_object_count - @errors.length is 0
                 after_save()
             dataType: 'json'
         when "dirty"
@@ -164,7 +164,7 @@ class Vault
                 after_save()
             complete: ->
               # Check to see if we're done.
-              if @dirty_object_count - @errors.length is 0
+              if --@dirty_object_count - @errors.length is 0
                 after_save()
             dataType: 'json'
   

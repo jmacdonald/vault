@@ -130,7 +130,7 @@
                   }
                 }, this),
                 complete: function() {
-                  if (this.dirty_object_count - this.errors.length === 0) {
+                  if (--this.dirty_object_count - this.errors.length === 0) {
                     return after_save();
                   }
                 },
@@ -154,7 +154,7 @@
                   }
                 }, this),
                 complete: function() {
-                  if (this.dirty_object_count - this.errors.length === 0) {
+                  if (--this.dirty_object_count - this.errors.length === 0) {
                     return after_save();
                   }
                 },
@@ -176,7 +176,7 @@
                   }
                 }, this),
                 complete: function() {
-                  if (this.dirty_object_count - this.errors.length === 0) {
+                  if (--this.dirty_object_count - this.errors.length === 0) {
                     return after_save();
                   }
                 },
