@@ -11,6 +11,7 @@
       this.dirty_object_count = 0;
       this.errors = [];
       this.save_error_count = 0;
+      this.locked = false;
       this.date = new Date;
       this.name = name;
       this.urls = urls;
@@ -122,15 +123,17 @@
       if (after_save == null) {
         after_save = function() {};
       }
-      if (!navigator.onLine || this.dirty_object_count === 0) {
-        if (!navigator.onLine) {
-          this.errors.push('Cannot reload, navigator is offline.');
-        }
-        if (this.dirty_object_count === 0) {
-          this.errors.push('Nothing to sync.');
-        }
+      if (this.locked) {
+        this.errors.push('Cannot save, vault is locked.');
+        return after_save();
+      } else if (!navigator.onLine) {
+        this.errors.push('Cannot save, navigator is offline.');
+        return after_save();
+      } else if (this.dirty_object_count === 0) {
+        this.errors.push('Nothing to save.');
         return after_save();
       }
+      this.locked = true;
       this.save_error_count = 0;
       sync_error = false;
       _ref = this.objects;
@@ -157,6 +160,7 @@
                 }, this),
                 complete: __bind(function() {
                   if (this.dirty_object_count - this.save_error_count === 0) {
+                    this.locked = false;
                     return after_save();
                   }
                 }, this),
@@ -181,6 +185,7 @@
                 }, this),
                 complete: __bind(function() {
                   if (this.dirty_object_count - this.save_error_count === 0) {
+                    this.locked = false;
                     return after_save();
                   }
                 }, this),
@@ -204,6 +209,7 @@
                 }, this),
                 complete: __bind(function() {
                   if (this.dirty_object_count - this.save_error_count === 0) {
+                    this.locked = false;
                     return after_save();
                   }
                 }, this),

@@ -6,6 +6,9 @@ class Vault
     @errors = []
     @save_error_count = 0
 
+    # This property is used to temporarily lock the vault during mutation methods.
+    @locked = false
+
     # Create a date object which will be used to
     # generate unique IDs for new records.
     @date = new Date
@@ -121,13 +124,19 @@ class Vault
 
   # Write local changes back to the server, using per-object requests.
   save: (after_save = ->) ->
-    # Don't bother if we're offline or there's nothing to sync.
-    if not navigator.onLine or @dirty_object_count is 0
-      if not navigator.onLine
-        @errors.push 'Cannot reload, navigator is offline.'
-      if @dirty_object_count is 0
-        @errors.push 'Nothing to sync.'
+    # Don't bother if the vault is locked, we're offline or there's nothing to sync.
+    if @locked
+      @errors.push 'Cannot save, vault is locked.'
       return after_save()
+    else if not navigator.onLine
+      @errors.push 'Cannot save, navigator is offline.'
+      return after_save()
+    else if @dirty_object_count is 0
+      @errors.push 'Nothing to save.'
+      return after_save()
+
+    # Lock the vault until the save is complete.
+    @locked = true
 
     # Clear the save error count as we're starting a new save operation.
     @save_error_count = 0
@@ -153,6 +162,7 @@ class Vault
             complete: =>
               # Check to see if we're done.
               if @dirty_object_count - @save_error_count is 0
+                @locked = false
                 after_save()
             dataType: 'json'
         when "new"
@@ -174,6 +184,7 @@ class Vault
             complete: =>
               # Check to see if we're done.
               if @dirty_object_count - @save_error_count is 0
+                @locked = false
                 after_save()
             dataType: 'json'
         when "dirty"
@@ -192,6 +203,7 @@ class Vault
             complete: =>
               # Check to see if we're done.
               if @dirty_object_count - @save_error_count is 0
+                @locked = false
                 after_save()
             dataType: 'json'
   
@@ -232,6 +244,7 @@ class Vault
       return after_sync()
 
     @save =>
+      # Only reload the collection if there were no save errors.
       if @errors.length is 0
         @reload(after_sync)
       else
