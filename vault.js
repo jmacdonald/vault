@@ -61,6 +61,10 @@
       return _results;
     };
     Vault.prototype.add = function(object) {
+      if (this.locked) {
+        this.errors.push('Cannot add, vault is locked.');
+        return false;
+      }
       if (object[this.options.id_attribute] == null) {
         object[this.options.id_attribute] = this.date.getTime();
       }
@@ -82,6 +86,10 @@
     };
     Vault.prototype.update = function(id) {
       var index, object, _len, _ref;
+      if (this.locked) {
+        this.errors.push('Cannot update, vault is locked.');
+        return false;
+      }
       _ref = this.objects;
       for (index = 0, _len = _ref.length; index < _len; index++) {
         object = _ref[index];
@@ -97,6 +105,10 @@
     };
     Vault.prototype["delete"] = function(id) {
       var index, object, _len, _ref;
+      if (this.locked) {
+        this.errors.push('Cannot delete, vault is locked.');
+        return false;
+      }
       _ref = this.objects;
       for (index = 0, _len = _ref.length; index < _len; index++) {
         object = _ref[index];

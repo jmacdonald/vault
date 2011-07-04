@@ -63,6 +63,10 @@ class Vault
 
   # Add a new item to the collection.
   add: (object) ->
+    # Don't bother if the vault is locked.
+    if @locked
+      @errors.push 'Cannot add, vault is locked.'
+      return false
 
     # If the object has no id, generate a temporary one and add it to the object.
     unless object[@options.id_attribute]?
@@ -91,6 +95,11 @@ class Vault
 
   # Update an existing item in the collection.
   update: (id) ->
+    # Don't bother if the vault is locked.
+    if @locked
+      @errors.push 'Cannot update, vault is locked.'
+      return false
+
     for object, index in @objects
       if object[@options.id_attribute] == id
         if object.status is "clean"
@@ -104,6 +113,11 @@ class Vault
   # Flag an object in the collection for deletion,
   # or if the object is new, remove it.
   delete: (id) ->
+    # Don't bother if the vault is locked.
+    if @locked
+      @errors.push 'Cannot delete, vault is locked.'
+      return false
+
     for object, index in @objects
       if object[@options.id_attribute] == id
         switch object.status
