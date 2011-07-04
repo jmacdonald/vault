@@ -224,10 +224,14 @@
       if (after_load == null) {
         after_load = function() {};
       }
-      if (!navigator.onLine) {
+      if (this.locked) {
+        this.errors.push('Cannot reload, vault is locked.');
+        return after_load();
+      } else if (!navigator.onLine) {
         this.errors.push('Cannot reload, navigator is offline.');
         return after_load();
       }
+      this.locked = true;
       return $.ajax({
         url: this.urls.list,
         dataType: 'json',
@@ -245,6 +249,9 @@
         error: __bind(function() {
           this.errors.push('Failed to list.');
           return after_load();
+        }, this),
+        complete: __bind(function() {
+          return this.locked = false;
         }, this)
       });
     };

@@ -209,10 +209,16 @@ class Vault
   
   # Used to wipe out the in-memory object list with a fresh one from the server.
   reload: (after_load = ->) ->
-    # Don't bother if we're offline.
-    unless navigator.onLine
+    # Don't bother if the vault is locked or we're offline.
+    if @locked
+      @errors.push 'Cannot reload, vault is locked.'
+      return after_load()
+    else if not navigator.onLine
       @errors.push 'Cannot reload, navigator is offline.'
       return after_load()
+
+    # Lock the vault until the reload is complete.
+    @locked = true
 
     $.ajax
       url: @urls.list
@@ -235,6 +241,9 @@ class Vault
 
         # Call the callback function as the reload is complete (albeit unsuccessful).
         after_load()
+      complete: =>
+        # Unlock the vault as the reload is complete.
+        @locked = false
 
   # Convenience method for saving and reloading in one shot.
   synchronize: (after_sync = ->) ->
