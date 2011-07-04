@@ -23,19 +23,29 @@
         value = options[option];
         this.options[option] = value;
       }
-      if (this.options.autoload) {
-        if (this.options.offline) {
-          if (!this.load()) {
-            this.reload(this.options.after_load);
-          }
-        } else {
-          this.reload(this.options.after_load);
-        }
-      }
       if (this.options.offline) {
         $(window).unload(__bind(function() {
           return this.store();
         }, this));
+      }
+      if (this.options.autoload) {
+        if (this.options.offline) {
+          if (this.load()) {
+            if (this.dirty_object_count > 0) {
+              this.options.after_load;
+            } else {
+              this.reload(this.options.after_load);
+            }
+          } else {
+            if (navigator.onLine) {
+              this.reload(this.options.after_load);
+            } else {
+              this.errors.push("Offline data failed to load. Could not load live data as browser is offline.");
+            }
+          }
+        } else {
+          this.reload(this.options.after_load);
+        }
       }
     }
     Vault.prototype.each = function(logic) {
@@ -245,11 +255,19 @@
       }, this));
     };
     Vault.prototype.load = function() {
+      var object, _i, _len, _ref;
       if (!this.options.offline) {
         return false;
       }
       if (localStorage.getItem(this.name)) {
         this.objects = $.parseJSON(localStorage.getItem(this.name));
+        _ref = this.objects;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          object = _ref[_i];
+          if (object.status !== "clean") {
+            this.dirty_object_count++;
+          }
+        }
         return true;
       } else {
         return false;

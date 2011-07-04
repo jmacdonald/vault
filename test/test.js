@@ -5,10 +5,14 @@
   };
   new_car = new_car_2 = null;
   cars = new Vault('cars', urls, {
+    offline: true,
     after_load: function() {
       return describe('Vault', function() {
         it('can load objects', function() {
           return expect(cars.objects.length).toEqual(3);
+        });
+        it('can store objects', function() {
+          return expect(cars.store).toBeTruthy();
         });
         it('can enumerate objects', function() {
           var cars_visited;
@@ -127,10 +131,14 @@
           });
           return expect(cars_visited).toEqual(1);
         });
-        return it('can synchronize properly', function() {
+        it('can synchronize properly', function() {
           return cars.synchronize(function() {
             return expect(cars.objects.length).toEqual(1);
           });
+        });
+        return it('can load objects', function() {
+          expect(cars.load).toBeTruthy();
+          return expect(cars.objects.length).toEqual(3);
         });
       });
     }

@@ -24,20 +24,32 @@ class Vault
     for option, value of options
       @options[option] = value
 
-    # Load the collection if configured to do so.
-    if @options.autoload
-      # Check the offline data store first, if configured to do so.
-      if @options.offline
-        if not @load()
-          @reload(@options.after_load)
-      else
-        @reload(@options.after_load)
-
     # Setup the vault for offline use.
     if @options.offline
       # Bind a cache routine to save data should the window be closed or url changed.
       $(window).unload =>
         @store()
+
+    # Load the collection if configured to do so.
+    if @options.autoload
+      # Check the offline data store first, if configured to do so.
+      if @options.offline
+        if @load()
+          if @dirty_object_count > 0
+            # Offline data loaded and modifications found; keep existing data.
+            @options.after_load
+          else
+            # No modifications in offline data; reload fresh data.
+            @reload(@options.after_load)
+        else
+          if navigator.onLine
+            # Load failed, but we're connected; reload fresh data.
+            @reload(@options.after_load)
+          else
+            # Load failed and we're offline; log an error.
+            @errors.push "Offline data failed to load. Could not load live data as browser is offline."
+      else
+        @reload(@options.after_load)
 
   # Iterate over non-deleted items in the collection.
   each: (logic) ->
@@ -228,6 +240,12 @@ class Vault
     # Try to load the collection.
     if localStorage.getItem(@name)
       @objects = $.parseJSON(localStorage.getItem @name)
+
+      # Calculate the number of dirty objects.
+      for object in @objects
+        unless object.status == "clean"
+          @dirty_object_count++
+      
       return true
     else
       return false

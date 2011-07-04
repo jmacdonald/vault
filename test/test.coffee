@@ -4,10 +4,14 @@ urls =
 new_car = new_car_2 = null
 
 cars = new Vault 'cars', urls,
+  offline: true
   after_load: ->
     describe 'Vault', ->
       it 'can load objects', ->
         expect(cars.objects.length).toEqual(3)
+
+      it 'can store objects', ->
+        expect(cars.store).toBeTruthy()
 
       it 'can enumerate objects', ->
         cars_visited = 0
@@ -123,3 +127,7 @@ cars = new Vault 'cars', urls,
       it 'can synchronize properly', ->
         cars.synchronize ->
           expect(cars.objects.length).toEqual(1)
+
+      it 'can load objects', ->
+        expect(cars.load).toBeTruthy()
+        expect(cars.objects.length).toEqual(3)
