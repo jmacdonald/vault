@@ -4,6 +4,7 @@ class Vault
     @objects = []
     @dirty_object_count = 0
     @errors = []
+    @save_error_count = 0
 
     # Create a date object which will be used to
     # generate unique IDs for new records.
@@ -128,9 +129,8 @@ class Vault
         @errors.push 'Nothing to sync.'
       return after_save()
 
-    # Clear out any previous errors; this is important because we use the errors
-    # array to track failed requests and determine when the save has completed.
-    @errors = []
+    # Clear the save error count as we're starting a new save operation.
+    @save_error_count = 0
 
     # Sync the in-memory data store to the server.
     sync_error = false
@@ -147,10 +147,12 @@ class Vault
               # Removed the deleted object from the collection.
               @objects.splice(index, 1)
               @dirty_object_count--
-            error: => @errors.push 'Failed to delete.'
+            error: =>
+              @errors.push 'Failed to delete.'
+              @save_error_count++
             complete: =>
               # Check to see if we're done.
-              if @dirty_object_count - @errors.length is 0
+              if @dirty_object_count - @save_error_count is 0
                 after_save()
             dataType: 'json'
         when "new"
@@ -166,10 +168,12 @@ class Vault
               # Replace the existing object with the new one from the server and extend it.
               object = @extend data # This will also set its status to clean.
               @dirty_object_count--
-            error: => @errors.push 'Failed to create.'
+            error: =>
+              @errors.push 'Failed to create.'
+              @save_error_count++
             complete: =>
               # Check to see if we're done.
-              if @dirty_object_count - @errors.length is 0
+              if @dirty_object_count - @save_error_count is 0
                 after_save()
             dataType: 'json'
         when "dirty"
@@ -182,10 +186,12 @@ class Vault
             success: (data) =>
               object.status = "clean"
               @dirty_object_count--
-            error: => @errors.push 'Failed to update.'
+            error: =>
+              @errors.push 'Failed to update.'
+              @save_error_count++
             complete: =>
               # Check to see if we're done.
-              if @dirty_object_count - @errors.length is 0
+              if @dirty_object_count - @save_error_count is 0
                 after_save()
             dataType: 'json'
   

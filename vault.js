@@ -10,6 +10,7 @@
       this.objects = [];
       this.dirty_object_count = 0;
       this.errors = [];
+      this.save_error_count = 0;
       this.date = new Date;
       this.name = name;
       this.urls = urls;
@@ -130,7 +131,7 @@
         }
         return after_save();
       }
-      this.errors = [];
+      this.save_error_count = 0;
       sync_error = false;
       _ref = this.objects;
       _results = [];
@@ -151,10 +152,11 @@
                   return this.dirty_object_count--;
                 }, this),
                 error: __bind(function() {
-                  return this.errors.push('Failed to delete.');
+                  this.errors.push('Failed to delete.');
+                  return this.save_error_count++;
                 }, this),
                 complete: __bind(function() {
-                  if (this.dirty_object_count - this.errors.length === 0) {
+                  if (this.dirty_object_count - this.save_error_count === 0) {
                     return after_save();
                   }
                 }, this),
@@ -174,10 +176,11 @@
                   return this.dirty_object_count--;
                 }, this),
                 error: __bind(function() {
-                  return this.errors.push('Failed to create.');
+                  this.errors.push('Failed to create.');
+                  return this.save_error_count++;
                 }, this),
                 complete: __bind(function() {
-                  if (this.dirty_object_count - this.errors.length === 0) {
+                  if (this.dirty_object_count - this.save_error_count === 0) {
                     return after_save();
                   }
                 }, this),
@@ -196,10 +199,11 @@
                   return this.dirty_object_count--;
                 }, this),
                 error: __bind(function() {
-                  return this.errors.push('Failed to update.');
+                  this.errors.push('Failed to update.');
+                  return this.save_error_count++;
                 }, this),
                 complete: __bind(function() {
-                  if (this.dirty_object_count - this.errors.length === 0) {
+                  if (this.dirty_object_count - this.save_error_count === 0) {
                     return after_save();
                   }
                 }, this),
