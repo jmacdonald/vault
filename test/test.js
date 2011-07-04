@@ -10,6 +10,14 @@
         it('can load objects', function() {
           return expect(cars.objects.length).toEqual(3);
         });
+        it('can enumerate objects', function() {
+          var cars_visited;
+          cars_visited = 0;
+          cars.each(function() {
+            return cars_visited++;
+          });
+          return expect(cars_visited).toEqual(3);
+        });
         it('can add objects', function() {
           new_car = cars.add({
             make: "Dodge",
@@ -110,6 +118,14 @@
           cars["delete"](3);
           expect(cars.objects.length).toEqual(3);
           return expect(cars.fetch(3).status).toEqual('deleted');
+        });
+        it('can enumerate non-deleted objects', function() {
+          var cars_visited;
+          cars_visited = 0;
+          cars.each(function() {
+            return cars_visited++;
+          });
+          return expect(cars_visited).toEqual(1);
         });
         return it('can synchronize properly', function() {
           return cars.synchronize(function() {

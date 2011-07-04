@@ -39,6 +39,12 @@ class Vault
       $(window).unload =>
         @store()
 
+  # Iterate over non-deleted items in the collection.
+  each: (logic) ->
+    for object in @objects
+      unless object.status == "deleted"
+        logic object
+
   # Add a new item to the collection.
   add: (object) ->
 

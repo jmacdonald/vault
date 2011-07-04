@@ -38,6 +38,16 @@
         }, this));
       }
     }
+    Vault.prototype.each = function(logic) {
+      var object, _i, _len, _ref, _results;
+      _ref = this.objects;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        object = _ref[_i];
+        _results.push(object.status !== "deleted" ? logic(object) : void 0);
+      }
+      return _results;
+    };
     Vault.prototype.add = function(object) {
       if (object[this.options.id_attribute] == null) {
         object[this.options.id_attribute] = this.date.getTime();

@@ -9,6 +9,12 @@ cars = new Vault 'cars', urls,
       it 'can load objects', ->
         expect(cars.objects.length).toEqual(3)
 
+      it 'can enumerate objects', ->
+        cars_visited = 0
+        cars.each ->
+          cars_visited++
+        expect(cars_visited).toEqual(3)
+
       it 'can add objects', ->
         new_car = cars.add
           make: "Dodge",
@@ -107,6 +113,12 @@ cars = new Vault 'cars', urls,
 
         expect(cars.objects.length).toEqual(3)
         expect(cars.fetch(3).status).toEqual('deleted')
+
+      it 'can enumerate non-deleted objects', ->
+        cars_visited = 0
+        cars.each ->
+          cars_visited++
+        expect(cars_visited).toEqual(1)
 
       it 'can synchronize properly', ->
         cars.synchronize ->
