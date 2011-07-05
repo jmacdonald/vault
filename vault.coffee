@@ -81,6 +81,9 @@ class Vault
     # Increase the count of dirty objects.
     @dirty_object_count++
 
+    # Store the collection.
+    @store
+
     # Return the extended object.
     return object
 
@@ -100,11 +103,17 @@ class Vault
       @errors.push 'Cannot update, vault is locked.'
       return false
 
+    # Find the object and flag it as dirty.
     for object, index in @objects
       if object[@options.id_attribute] == id
         if object.status is "clean"
           object.status = "dirty"
           @dirty_object_count++
+
+        # Store the collection.
+        @store
+
+        # Update was successful.
         return true
 
     # Object not found.
@@ -131,6 +140,11 @@ class Vault
             @dirty_object_count++
           when "dirty"
             object.status = "deleted"
+
+        # Store the collection.
+        @store
+
+        # Delete was successful.
         return true
 
     # Object not found.
@@ -157,69 +171,78 @@ class Vault
 
     # Sync the in-memory data store to the server.
     sync_error = false
-    for object, index in @objects
-      switch object.status
-        when "deleted"
-          $.ajax
-            type: 'DELETE'
-            url: @urls.delete
-            data: @strip object
-            fixture: (settings) ->
-              return true
-            success: (data) =>
-              # Removed the deleted object from the collection.
-              @objects.splice(index, 1)
-              @dirty_object_count--
-            error: =>
-              @errors.push 'Failed to delete.'
-              @save_error_count++
-            complete: =>
-              # Check to see if we're done.
-              if @dirty_object_count - @save_error_count is 0
-                @locked = false
-                after_save()
-            dataType: 'json'
-        when "new"
-          $.ajax
-            type: 'POST'
-            url: @urls.create
-            data: @strip object
-            fixture: (settings) =>
-              settings.data.id = @date.getTime()
+    for object in @objects
+      do (object) =>
+        switch object.status
+          when "deleted"
+            $.ajax
+              type: 'DELETE'
+              url: @urls.delete
+              data: @strip object
+              fixture: (settings) ->
+                return true
+              success: (data) =>
+                # Forcibly remove the deleted object from the collection.
+                for vault_object, index in @objects
+                  if vault_object.id == object.id
+                    @objects.splice(index, 1)
+                    @dirty_object_count--
+              error: =>
+                @errors.push 'Failed to delete.'
+                @save_error_count++
+              complete: =>
+                # Check to see if we're done.
+                if @dirty_object_count - @save_error_count is 0
+                  # Store the collection, unlock the vault, and execute the callback method.
+                  @store
+                  @locked = false
+                  after_save()
+              dataType: 'json'
+          when "new"
+            $.ajax
+              type: 'POST'
+              url: @urls.create
+              data: @strip object
+              fixture: (settings) =>
+                settings.data.id = @date.getTime()
 
-              return settings.data
-            success: (data) =>
-              # Replace the existing object with the new one from the server and extend it.
-              object = @extend data # This will also set its status to clean.
-              @dirty_object_count--
-            error: =>
-              @errors.push 'Failed to create.'
-              @save_error_count++
-            complete: =>
-              # Check to see if we're done.
-              if @dirty_object_count - @save_error_count is 0
-                @locked = false
-                after_save()
-            dataType: 'json'
-        when "dirty"
-          $.ajax
-            type: 'POST'
-            url: @urls.update
-            data: @strip object
-            fixture: (settings) ->
-              return true
-            success: (data) =>
-              object.status = "clean"
-              @dirty_object_count--
-            error: =>
-              @errors.push 'Failed to update.'
-              @save_error_count++
-            complete: =>
-              # Check to see if we're done.
-              if @dirty_object_count - @save_error_count is 0
-                @locked = false
-                after_save()
-            dataType: 'json'
+                return settings.data
+              success: (data) =>
+                # Replace the existing object with the new one from the server and extend it.
+                object = @extend data # This will also set its status to clean.
+                @dirty_object_count--
+              error: =>
+                @errors.push 'Failed to create.'
+                @save_error_count++
+              complete: =>
+                # Check to see if we're done.
+                if @dirty_object_count - @save_error_count is 0
+                  # Store the collection, unlock the vault, and execute the callback method.
+                  @store
+                  @locked = false
+                  after_save()
+              dataType: 'json'
+          when "dirty"
+            $.ajax
+              type: 'POST'
+              url: @urls.update
+              data: @strip object
+              fixture: (settings) ->
+                return true
+              success: (data) =>
+                object.status = "clean"
+                @dirty_object_count--
+              error: =>
+                @errors.push 'Failed to update.'
+                @save_error_count++
+              complete: =>
+                # Check to see if we're done.
+                if @dirty_object_count - @save_error_count is 0
+                  # Store the collection, unlock the vault, and execute the callback method.
+                  @store
+                  @locked = false
+                  after_save()
+              dataType: 'json'
   
   # Used to wipe out the in-memory object list with a fresh one from the server.
   reload: (after_load = ->) ->
@@ -247,6 +270,9 @@ class Vault
 
         # Reset the count of dirty objects.
         @dirty_object_count = 0
+
+        # Store the collection.
+        @store
 
         # Call the callback function as the reload is complete.
         after_load()
@@ -307,7 +333,7 @@ class Vault
     object.status = status
     object.update = =>
       @update(object.id)
-    object.delete = (destroy = false) =>
+    object.delete = =>
       @delete(object.id)
 
     return object

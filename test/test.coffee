@@ -9,6 +9,7 @@ cars = new Vault 'cars', urls,
     describe 'Vault', ->
       it 'can load objects', ->
         expect(cars.objects.length).toEqual(3)
+        expect(cars.dirty_object_count).toEqual(0)
 
       it 'can store objects', ->
         expect(cars.store).toBeTruthy()
@@ -34,6 +35,12 @@ cars = new Vault 'cars', urls,
           make: "Tesla",
           model: "Roadster",
           year: 2009
+
+        expect(cars.objects.length).toEqual(5)
+        expect(cars.dirty_object_count).toEqual(2)
+
+      it 'is storing objects after adding', ->
+        expect(cars.load).toBeTruthy()
 
         expect(cars.objects.length).toEqual(5)
         expect(cars.dirty_object_count).toEqual(2)
@@ -74,12 +81,19 @@ cars = new Vault 'cars', urls,
         expect(cars.objects.length).toEqual(5)
         expect(cars.dirty_object_count).toEqual(3)
 
+      it 'is storing objects after updating', ->
+        expect(cars.load).toBeTruthy()
+
+        expect(cars.objects.length).toEqual(5)
+        expect(cars.dirty_object_count).toEqual(3)
+
       it 'can strip new objects', ->
         stripped_object = cars.strip(new_car)
 
         for key, value of stripped_object
           expect(['make', 'model', 'year']).toContain key
         expect(cars.objects.length).toEqual(5)
+        expect(cars.dirty_object_count).toEqual(3)
 
       it 'can strip new objects with a specified id', ->
         stripped_object = cars.strip(new_car_2)
@@ -87,6 +101,7 @@ cars = new Vault 'cars', urls,
         for key, value of stripped_object
           expect(['make', 'model', 'year']).toContain key
         expect(cars.objects.length).toEqual(5)
+        expect(cars.dirty_object_count).toEqual(3)
 
       it 'can strip existing objects', ->
         stripped_object = cars.strip(cars.fetch(3))
@@ -94,40 +109,80 @@ cars = new Vault 'cars', urls,
         for key, value of stripped_object
           expect(['id', 'make', 'model', 'year']).toContain key
         expect(cars.objects.length).toEqual(5)
+        expect(cars.dirty_object_count).toEqual(3)
 
       it 'can remove new objects via instances', ->
         new_car.delete()
 
         expect(cars.objects.length).toEqual(4)
+        expect(cars.dirty_object_count).toEqual(2)
 
       it 'can remove new objects via methods', ->
         cars.delete(12)
 
         expect(cars.objects.length).toEqual(3)
+        expect(cars.dirty_object_count).toEqual(1)
 
       it 'can remove existing objects via instances', ->
         car = cars.fetch(1)
         car.delete()
 
         expect(cars.objects.length).toEqual(3)
+        expect(cars.dirty_object_count).toEqual(1)
         expect(car.status).toEqual('deleted')
 
       it 'can remove existing objects via methods', ->
         cars.delete(3)
 
         expect(cars.objects.length).toEqual(3)
+        expect(cars.dirty_object_count).toEqual(2)
         expect(cars.fetch(3).status).toEqual('deleted')
+
+      it 'is storing objects after deleting', ->
+        expect(cars.load).toBeTruthy()
+
+        expect(cars.objects.length).toEqual(3)
+        expect(cars.dirty_object_count).toEqual(2)
 
       it 'can enumerate non-deleted objects', ->
         cars_visited = 0
         cars.each ->
           cars_visited++
         expect(cars_visited).toEqual(1)
-
-      it 'can synchronize properly', ->
-        cars.synchronize ->
-          expect(cars.objects.length).toEqual(1)
-
-      it 'can load objects', ->
-        expect(cars.load).toBeTruthy()
         expect(cars.objects.length).toEqual(3)
+        expect(cars.dirty_object_count).toEqual(2)
+
+      it 'can save properly', ->
+        cars.save ->
+          expect(cars.objects.length).toEqual(1)
+          expect(cars.dirty_object_count).toEqual(0)
+
+      it 'is storing objects after save', ->
+        waitsFor ->
+          not cars.locked
+
+        runs ->
+          expect(cars.locked).toBeFalsy()
+          expect(cars.load).toBeTruthy()
+
+          expect(cars.objects.length).toEqual(1)
+          expect(cars.dirty_object_count).toEqual(0)
+
+      it 'can reload objects', ->
+        waitsFor ->
+          not cars.locked
+
+        runs ->
+          cars.reload ->
+            expect(cars.objects.length).toEqual(3)
+            expect(cars.dirty_object_count).toEqual(0)
+
+      it 'is storing objects after reload', ->
+        waitsFor ->
+          not cars.locked
+        
+        runs ->
+          expect(cars.load).toBeTruthy()
+
+          expect(cars.objects.length).toEqual(3)
+          expect(cars.dirty_object_count).toEqual(0)

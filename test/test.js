@@ -9,7 +9,8 @@
     after_load: function() {
       return describe('Vault', function() {
         it('can load objects', function() {
-          return expect(cars.objects.length).toEqual(3);
+          expect(cars.objects.length).toEqual(3);
+          return expect(cars.dirty_object_count).toEqual(0);
         });
         it('can store objects', function() {
           return expect(cars.store).toBeTruthy();
@@ -38,6 +39,11 @@
             model: "Roadster",
             year: 2009
           });
+          expect(cars.objects.length).toEqual(5);
+          return expect(cars.dirty_object_count).toEqual(2);
+        });
+        it('is storing objects after adding', function() {
+          expect(cars.load).toBeTruthy();
           expect(cars.objects.length).toEqual(5);
           return expect(cars.dirty_object_count).toEqual(2);
         });
@@ -76,6 +82,11 @@
           expect(cars.objects.length).toEqual(5);
           return expect(cars.dirty_object_count).toEqual(3);
         });
+        it('is storing objects after updating', function() {
+          expect(cars.load).toBeTruthy();
+          expect(cars.objects.length).toEqual(5);
+          return expect(cars.dirty_object_count).toEqual(3);
+        });
         it('can strip new objects', function() {
           var key, stripped_object, value;
           stripped_object = cars.strip(new_car);
@@ -83,7 +94,8 @@
             value = stripped_object[key];
             expect(['make', 'model', 'year']).toContain(key);
           }
-          return expect(cars.objects.length).toEqual(5);
+          expect(cars.objects.length).toEqual(5);
+          return expect(cars.dirty_object_count).toEqual(3);
         });
         it('can strip new objects with a specified id', function() {
           var key, stripped_object, value;
@@ -92,7 +104,8 @@
             value = stripped_object[key];
             expect(['make', 'model', 'year']).toContain(key);
           }
-          return expect(cars.objects.length).toEqual(5);
+          expect(cars.objects.length).toEqual(5);
+          return expect(cars.dirty_object_count).toEqual(3);
         });
         it('can strip existing objects', function() {
           var key, stripped_object, value;
@@ -101,27 +114,37 @@
             value = stripped_object[key];
             expect(['id', 'make', 'model', 'year']).toContain(key);
           }
-          return expect(cars.objects.length).toEqual(5);
+          expect(cars.objects.length).toEqual(5);
+          return expect(cars.dirty_object_count).toEqual(3);
         });
         it('can remove new objects via instances', function() {
           new_car["delete"]();
-          return expect(cars.objects.length).toEqual(4);
+          expect(cars.objects.length).toEqual(4);
+          return expect(cars.dirty_object_count).toEqual(2);
         });
         it('can remove new objects via methods', function() {
           cars["delete"](12);
-          return expect(cars.objects.length).toEqual(3);
+          expect(cars.objects.length).toEqual(3);
+          return expect(cars.dirty_object_count).toEqual(1);
         });
         it('can remove existing objects via instances', function() {
           var car;
           car = cars.fetch(1);
           car["delete"]();
           expect(cars.objects.length).toEqual(3);
+          expect(cars.dirty_object_count).toEqual(1);
           return expect(car.status).toEqual('deleted');
         });
         it('can remove existing objects via methods', function() {
           cars["delete"](3);
           expect(cars.objects.length).toEqual(3);
+          expect(cars.dirty_object_count).toEqual(2);
           return expect(cars.fetch(3).status).toEqual('deleted');
+        });
+        it('is storing objects after deleting', function() {
+          expect(cars.load).toBeTruthy();
+          expect(cars.objects.length).toEqual(3);
+          return expect(cars.dirty_object_count).toEqual(2);
         });
         it('can enumerate non-deleted objects', function() {
           var cars_visited;
@@ -129,16 +152,47 @@
           cars.each(function() {
             return cars_visited++;
           });
-          return expect(cars_visited).toEqual(1);
+          expect(cars_visited).toEqual(1);
+          expect(cars.objects.length).toEqual(3);
+          return expect(cars.dirty_object_count).toEqual(2);
         });
-        it('can synchronize properly', function() {
-          return cars.synchronize(function() {
-            return expect(cars.objects.length).toEqual(1);
+        it('can save properly', function() {
+          return cars.save(function() {
+            expect(cars.objects.length).toEqual(1);
+            return expect(cars.dirty_object_count).toEqual(0);
           });
         });
-        return it('can load objects', function() {
-          expect(cars.load).toBeTruthy();
-          return expect(cars.objects.length).toEqual(3);
+        it('is storing objects after save', function() {
+          waitsFor(function() {
+            return !cars.locked;
+          });
+          return runs(function() {
+            expect(cars.locked).toBeFalsy();
+            expect(cars.load).toBeTruthy();
+            expect(cars.objects.length).toEqual(1);
+            return expect(cars.dirty_object_count).toEqual(0);
+          });
+        });
+        it('can reload objects', function() {
+          waitsFor(function() {
+            return !cars.locked;
+          });
+          return runs(function() {
+            return cars.reload(function() {
+              expect(cars.objects.length).toEqual(3);
+              return expect(cars.dirty_object_count).toEqual(0);
+            });
+          });
+        });
+        return it('is storing objects after reload', function() {
+          waitsFor(function() {
+            return !cars.locked;
+          });
+          return runs(function() {
+            expect(cars.load).toBeTruthy();
+            expect(cars.objects.length).toEqual(3);
+            return expect(cars.dirty_object_count).toEqual(0);
+          });
         });
       });
     }

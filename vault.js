@@ -71,6 +71,7 @@
       this.extend(object, "new");
       this.objects.push(object);
       this.dirty_object_count++;
+      this.store;
       return object;
     };
     Vault.prototype.fetch = function(id) {
@@ -98,6 +99,7 @@
             object.status = "dirty";
             this.dirty_object_count++;
           }
+          this.store;
           return true;
         }
       }
@@ -125,13 +127,14 @@
             case "dirty":
               object.status = "deleted";
           }
+          this.store;
           return true;
         }
       }
       return false;
     };
     Vault.prototype.save = function(after_save) {
-      var index, object, sync_error, _len, _ref, _results;
+      var object, sync_error, _i, _len, _ref, _results;
       if (after_save == null) {
         after_save = function() {};
       }
@@ -150,9 +153,9 @@
       sync_error = false;
       _ref = this.objects;
       _results = [];
-      for (index = 0, _len = _ref.length; index < _len; index++) {
-        object = _ref[index];
-        _results.push((function() {
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        object = _ref[_i];
+        _results.push(__bind(function(object) {
           switch (object.status) {
             case "deleted":
               return $.ajax({
@@ -163,8 +166,14 @@
                   return true;
                 },
                 success: __bind(function(data) {
-                  this.objects.splice(index, 1);
-                  return this.dirty_object_count--;
+                  var index, vault_object, _len2, _ref2, _results2;
+                  _ref2 = this.objects;
+                  _results2 = [];
+                  for (index = 0, _len2 = _ref2.length; index < _len2; index++) {
+                    vault_object = _ref2[index];
+                    _results2.push(vault_object.id === object.id ? (this.objects.splice(index, 1), this.dirty_object_count--) : void 0);
+                  }
+                  return _results2;
                 }, this),
                 error: __bind(function() {
                   this.errors.push('Failed to delete.');
@@ -172,6 +181,7 @@
                 }, this),
                 complete: __bind(function() {
                   if (this.dirty_object_count - this.save_error_count === 0) {
+                    this.store;
                     this.locked = false;
                     return after_save();
                   }
@@ -197,6 +207,7 @@
                 }, this),
                 complete: __bind(function() {
                   if (this.dirty_object_count - this.save_error_count === 0) {
+                    this.store;
                     this.locked = false;
                     return after_save();
                   }
@@ -221,6 +232,7 @@
                 }, this),
                 complete: __bind(function() {
                   if (this.dirty_object_count - this.save_error_count === 0) {
+                    this.store;
                     this.locked = false;
                     return after_save();
                   }
@@ -228,7 +240,7 @@
                 dataType: 'json'
               });
           }
-        }).call(this));
+        }, this)(object));
       }
       return _results;
     };
@@ -256,6 +268,7 @@
             this.extend(object);
           }
           this.dirty_object_count = 0;
+          this.store;
           return after_load();
         }, this),
         error: __bind(function() {
@@ -317,10 +330,7 @@
       object.update = __bind(function() {
         return this.update(object.id);
       }, this);
-      object["delete"] = __bind(function(destroy) {
-        if (destroy == null) {
-          destroy = false;
-        }
+      object["delete"] = __bind(function() {
         return this["delete"](object.id);
       }, this);
       return object;
