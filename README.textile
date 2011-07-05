@@ -5,3 +5,13 @@ CoffeeScript/JavaScript online/offline data store.
 This library acts as a container for a collection of arbitrary objects, providing persistence using RESTful JSON web services and HTML5 offline storage. It will house a collection of objects, add/delete objects, track changes, and synchronize said changes back to the server. It's ideal for environments where a stable connection can't be guaranteed, and data (as well as modifications) need to be cached and synchronized in batch.
 
 Read-only apps need not specify all URLs; a list-only map will suffice.
+
+Simple Explanation & Use Case
+
+Vault helps alleviate the need for cellular connectivity when writing mobile web applications.
+
+You've got an ajax-based application running on a smartphone and/or tablet. It's a simple CRUD-based app that interacts with the server whenever a change happens. You delete an object, it sends a DELETE request to the server and you reload the list of items. What happens when your smartphone or tablet loses connectivity?
+
+ Your application is useless.
+
+ If you want your app to work in these situations, you need to save that delete request temporarily and issue it when you're back online. This applies for all of the other CRUD actions, too. That's where Vault comes in; it takes care of all of this for you. Instead of interacting directly with your web services, you interact with a Vault, and tell it do the synchronization when you're ready. Using Vault, you can write mobile applications that run on wifi-only devices, instead of depending on costly and unreliable cellular data plans.
