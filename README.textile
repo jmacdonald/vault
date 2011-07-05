@@ -6,7 +6,7 @@ This library acts as a container for a collection of arbitrary objects, providin
 
 Read-only apps need not specify all URLs; a list-only map will suffice.
 
-Simple Explanation & Use Case
+h2. Simple Explanation & Use Case
 
 Vault helps alleviate the need for cellular connectivity when writing mobile web applications.
 
