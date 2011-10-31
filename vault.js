@@ -74,7 +74,7 @@
       this.store;
       return object;
     };
-    Vault.prototype.fetch = function(id) {
+    Vault.prototype.find = function(id) {
       var object, _i, _len, _ref;
       _ref = this.objects;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {

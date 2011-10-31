@@ -46,13 +46,13 @@ cars = new Vault 'cars', urls,
         expect(cars.dirty_object_count).toEqual(2)
 
       it 'can read new objects', ->
-        expect(cars.fetch(new_car.id).model).toEqual("Viper SRT-10")
+        expect(cars.find(new_car.id).model).toEqual("Viper SRT-10")
 
       it 'can read new objects with a specified id', ->
-        expect(cars.fetch(12).model).toEqual("Roadster")
+        expect(cars.find(12).model).toEqual("Roadster")
 
       it 'can read existing objects', ->
-        expect(cars.fetch(2).model).toEqual("Lancer Evolution X")
+        expect(cars.find(2).model).toEqual("Lancer Evolution X")
 
       it 'can update new objects via instances', ->
         new_car.make = "Lamborghini"
@@ -60,24 +60,24 @@ cars = new Vault 'cars', urls,
         new_car.year = 2009
         new_car.update()
 
-        expect(cars.fetch(new_car.id).make).toEqual("Lamborghini")
-        expect(cars.fetch(new_car.id).model).toEqual("Murcielago")
-        expect(cars.fetch(new_car.id).year).toEqual(2009)
-        expect(cars.fetch(new_car.id).status).toEqual('new')
+        expect(cars.find(new_car.id).make).toEqual("Lamborghini")
+        expect(cars.find(new_car.id).model).toEqual("Murcielago")
+        expect(cars.find(new_car.id).year).toEqual(2009)
+        expect(cars.find(new_car.id).status).toEqual('new')
         expect(cars.objects.length).toEqual(5)
         expect(cars.dirty_object_count).toEqual(2)
 
       it 'can update existing objects via instances', ->
-        car = cars.fetch(1)
+        car = cars.find(1)
         car.make = "Toyota"
         car.model = "Supra"
         car.year = 2002
         car.update()
 
-        expect(cars.fetch(1).make).toEqual("Toyota")
-        expect(cars.fetch(1).model).toEqual("Supra")
-        expect(cars.fetch(1).year).toEqual(2002)
-        expect(cars.fetch(1).status).toEqual('dirty')
+        expect(cars.find(1).make).toEqual("Toyota")
+        expect(cars.find(1).model).toEqual("Supra")
+        expect(cars.find(1).year).toEqual(2002)
+        expect(cars.find(1).status).toEqual('dirty')
         expect(cars.objects.length).toEqual(5)
         expect(cars.dirty_object_count).toEqual(3)
 
@@ -104,7 +104,7 @@ cars = new Vault 'cars', urls,
         expect(cars.dirty_object_count).toEqual(3)
 
       it 'can strip existing objects', ->
-        stripped_object = cars.strip(cars.fetch(3))
+        stripped_object = cars.strip(cars.find(3))
 
         for key, value of stripped_object
           expect(['id', 'make', 'model', 'year']).toContain key
@@ -124,7 +124,7 @@ cars = new Vault 'cars', urls,
         expect(cars.dirty_object_count).toEqual(1)
 
       it 'can remove existing objects via instances', ->
-        car = cars.fetch(1)
+        car = cars.find(1)
         car.delete()
 
         expect(cars.objects.length).toEqual(3)
@@ -136,7 +136,7 @@ cars = new Vault 'cars', urls,
 
         expect(cars.objects.length).toEqual(3)
         expect(cars.dirty_object_count).toEqual(2)
-        expect(cars.fetch(3).status).toEqual('deleted')
+        expect(cars.find(3).status).toEqual('deleted')
 
       it 'is storing objects after deleting', ->
         expect(cars.load).toBeTruthy()

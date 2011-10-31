@@ -87,8 +87,8 @@ class Vault
     # Return the extended object.
     return object
 
-  # Fetch an object in the collection using its id.
-  fetch: (id) ->
+  # Find an object in the collection using its id.
+  find: (id) ->
     for object in @objects
       if object[@options.id_attribute] == id
         return object
