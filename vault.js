@@ -339,16 +339,16 @@
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         sub_collection = _ref[_i];
         if (object[sub_collection] != null) {
-          object[sub_collection].find = function(id) {
+          object[sub_collection].find = __bind(function(id) {
             var sub_collection_object, _j, _len2, _ref2;
             _ref2 = object[sub_collection];
             for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
               sub_collection_object = _ref2[_j];
-              if (sub_collection_object.id === id) {
+              if (sub_collection_object[this.options.id_attribute] === id) {
                 return sub_collection_object;
               }
             }
-          };
+          }, this);
         }
       }
       return object;

@@ -342,9 +342,9 @@ class Vault
     # Add find function to any configured sub-collections that are defined.
     for sub_collection in @options.sub_collections
       if object[sub_collection]?
-        object[sub_collection].find = (id) ->
+        object[sub_collection].find = (id) =>
           for sub_collection_object in object[sub_collection]
-            if sub_collection_object.id is id
+            if sub_collection_object[@options.id_attribute] is id
               return sub_collection_object
 
     return object
