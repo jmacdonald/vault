@@ -3,18 +3,37 @@
     "id": 1,
     "make": "Ford",
     "model": "Shelby Mustang GT500",
-    "year": 2009
+    "year": 2009,
+    "parts": [
+      {
+        "id": 1,
+        "name": "Air Filter",
+        "price": 19.99
+      },{
+        "id": 2,
+        "name": "Head Gasket",
+        "price": 9.99
+      }
+    ]
   },
   {
     "id": 2,
     "make": "Mitsubishi",
     "model": "Lancer Evolution X",
-    "year": 2010
+    "year": 2010,
+    "parts": [
+      {
+        "id": 3,
+        "name": "Turbocharger",
+        "price": 2199.99
+      }
+    ]
   },
   {
     "id": 3,
     "make": "Nissan",
     "model": "370Z Nismo",
-    "year": 2011
+    "year": 2011,
+    "parts": []
   }
 ]

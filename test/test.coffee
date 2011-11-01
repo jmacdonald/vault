@@ -18,7 +18,19 @@ cars = new Vault 'cars', urls,
         cars_visited = 0
         cars.each ->
           cars_visited++
+        
         expect(cars_visited).toEqual(3)
+      
+      it 'can find top-level objects', ->
+        car = cars.find(1)
+        
+        expect(car.model).toEqual("Shelby Mustang GT500")
+      
+      it 'can find second-level objects', ->
+        car = cars.find(2)
+        part = car.parts.find(3)
+        
+        expect(part.name).toEqual("Turbocharger")
 
       it 'can add objects', ->
         new_car = cars.add
@@ -107,7 +119,7 @@ cars = new Vault 'cars', urls,
         stripped_object = cars.strip(cars.find(3))
 
         for key, value of stripped_object
-          expect(['id', 'make', 'model', 'year']).toContain key
+          expect(['id', 'make', 'model', 'year', 'parts']).toContain key
         expect(cars.objects.length).toEqual(5)
         expect(cars.dirty_object_count).toEqual(3)
 

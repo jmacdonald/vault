@@ -23,6 +23,17 @@
           });
           return expect(cars_visited).toEqual(3);
         });
+        it('can find top-level objects', function() {
+          var car;
+          car = cars.find(1);
+          return expect(car.model).toEqual("Shelby Mustang GT500");
+        });
+        it('can find second-level objects', function() {
+          var car, part;
+          car = cars.find(2);
+          part = car.parts.find(3);
+          return expect(part.name).toEqual("Turbocharger");
+        });
         it('can add objects', function() {
           new_car = cars.add({
             make: "Dodge",
@@ -112,7 +123,7 @@
           stripped_object = cars.strip(cars.find(3));
           for (key in stripped_object) {
             value = stripped_object[key];
-            expect(['id', 'make', 'model', 'year']).toContain(key);
+            expect(['id', 'make', 'model', 'year', 'parts']).toContain(key);
           }
           expect(cars.objects.length).toEqual(5);
           return expect(cars.dirty_object_count).toEqual(3);
