@@ -6,6 +6,7 @@
   new_car = new_car_2 = null;
   cars = new Vault('cars', urls, {
     offline: true,
+    sub_collections: ['parts'],
     after_load: function() {
       return describe('Vault', function() {
         it('can load objects', function() {

@@ -5,6 +5,7 @@ new_car = new_car_2 = null
 
 cars = new Vault 'cars', urls,
   offline: true
+  sub_collections: ['parts']
   after_load: ->
     describe 'Vault', ->
       it 'can load objects', ->

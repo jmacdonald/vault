@@ -19,7 +19,8 @@
         autoload: true,
         after_load: function() {},
         id_attribute: "id",
-        offline: false
+        offline: false,
+        sub_collections: []
       };
       for (option in options) {
         value = options[option];
@@ -323,6 +324,7 @@
       return true;
     };
     Vault.prototype.extend = function(object, status) {
+      var sub_collection, _i, _len, _ref;
       if (status == null) {
         status = "clean";
       }
@@ -333,6 +335,22 @@
       object["delete"] = __bind(function() {
         return this["delete"](object.id);
       }, this);
+      _ref = this.options.sub_collections;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        sub_collection = _ref[_i];
+        if (object[sub_collection] != null) {
+          object[sub_collection].find = function(id) {
+            var sub_collection_object, _j, _len2, _ref2;
+            _ref2 = object[sub_collection];
+            for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
+              sub_collection_object = _ref2[_j];
+              if (sub_collection_object.id === id) {
+                return sub_collection_object;
+              }
+            }
+          };
+        }
+      }
       return object;
     };
     Vault.prototype.strip = function(object) {

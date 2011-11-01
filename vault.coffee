@@ -23,6 +23,7 @@ class Vault
       after_load: ->
       id_attribute: "id"
       offline: false
+      sub_collections: []
 
     # Merge default options with user-defined ones.
     for option, value of options
@@ -330,11 +331,21 @@ class Vault
 
   # Extend an object with vault-specific variables and functions.
   extend: (object, status="clean") ->
+    
+    # Add simple variables and methods.
     object.status = status
     object.update = =>
       @update(object.id)
     object.delete = =>
       @delete(object.id)
+    
+    # Add find function to any configured sub-collections that are defined.
+    for sub_collection in @options.sub_collections
+      if object[sub_collection]?
+        object[sub_collection].find = (id) ->
+          for sub_collection_object in object[sub_collection]
+            if sub_collection_object.id is id
+              return sub_collection_object
 
     return object
 
