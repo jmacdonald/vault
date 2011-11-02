@@ -1,9 +1,8 @@
 (function() {
-  var new_car, new_car_2, urls;
+  var urls;
   urls = {
     list: "test.json"
   };
-  new_car = new_car_2 = null;
   describe('Vault', function() {
     var cars;
     cars = null;
@@ -43,6 +42,7 @@
       return expect(part.name).toEqual("Turbocharger");
     });
     it('can add objects', function() {
+      var new_car;
       new_car = cars.add({
         make: "Dodge",
         model: "Viper SRT-10",
@@ -52,7 +52,8 @@
       return expect(cars.dirty_object_count).toEqual(1);
     });
     it('can add objects with a specified id', function() {
-      new_car_2 = cars.add({
+      var new_car;
+      new_car = cars.add({
         id: 12,
         make: "Tesla",
         model: "Roadster",
@@ -85,6 +86,7 @@
       return expect(cars.dirty_object_count).toEqual(1);
     });
     it('is storing objects after adding', function() {
+      var new_car;
       new_car = cars.add({
         id: 12,
         make: "Tesla",
@@ -96,6 +98,7 @@
       return expect(cars.dirty_object_count).toEqual(1);
     });
     it('can read new objects', function() {
+      var new_car;
       new_car = cars.add({
         make: "Dodge",
         model: "Viper SRT-10",
@@ -104,7 +107,8 @@
       return expect(cars.find(new_car.id).model).toEqual("Viper SRT-10");
     });
     it('can read new objects with a specified id', function() {
-      new_car_2 = cars.add({
+      var new_car;
+      new_car = cars.add({
         id: 12,
         make: "Tesla",
         model: "Roadster",
@@ -116,6 +120,7 @@
       return expect(cars.find(2).model).toEqual("Lancer Evolution X");
     });
     it('can update new objects via instances', function() {
+      var new_car;
       new_car = cars.add({
         make: "Dodge",
         model: "Viper SRT-10",
@@ -158,7 +163,7 @@
       return expect(cars.dirty_object_count).toEqual(1);
     });
     it('can strip new objects', function() {
-      var key, stripped_object, value;
+      var key, new_car, stripped_object, value;
       new_car = cars.add({
         make: "Dodge",
         model: "Viper SRT-10",
@@ -173,7 +178,7 @@
       return expect(cars.dirty_object_count).toEqual(1);
     });
     it('can strip new objects with a specified id', function() {
-      var key, stripped_object, value;
+      var key, new_car, stripped_object, value;
       new_car = cars.add({
         make: "Dodge",
         model: "Viper SRT-10",
@@ -198,6 +203,7 @@
       return expect(cars.dirty_object_count).toEqual(0);
     });
     it('can remove new objects via instances', function() {
+      var new_car;
       new_car = cars.add({
         make: "Dodge",
         model: "Viper SRT-10",
@@ -208,6 +214,7 @@
       return expect(cars.dirty_object_count).toEqual(0);
     });
     it('can remove new objects via methods', function() {
+      var new_car;
       new_car = cars.add({
         id: 12,
         make: "Tesla",
@@ -250,7 +257,7 @@
       return expect(cars.dirty_object_count).toEqual(1);
     });
     it('can save properly', function() {
-      var car;
+      var car, new_car;
       new_car = cars.add({
         make: "Dodge",
         model: "Viper SRT-10",
@@ -269,6 +276,7 @@
       });
     });
     it('is storing objects after save', function() {
+      var new_car;
       new_car = cars.add({
         make: "Dodge",
         model: "Viper SRT-10",
@@ -282,6 +290,7 @@
       });
     });
     it('can reload objects', function() {
+      var new_car;
       new_car = cars.add({
         make: "Dodge",
         model: "Viper SRT-10",
@@ -296,6 +305,7 @@
       });
     });
     return it('is refreshing stored objects after a reload', function() {
+      var new_car;
       new_car = cars.add({
         make: "Dodge",
         model: "Viper SRT-10",

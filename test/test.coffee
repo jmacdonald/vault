@@ -1,8 +1,6 @@
 urls =
   list: "test.json"
 
-new_car = new_car_2 = null
-
 describe 'Vault', ->
   # Setup a new, fresh Vault for every test.
   cars = null
@@ -48,7 +46,7 @@ describe 'Vault', ->
     expect(cars.dirty_object_count).toEqual(1)
 
   it 'can add objects with a specified id', ->
-    new_car_2 = cars.add
+    new_car = cars.add
       id: 12,
       make: "Tesla",
       model: "Roadster",
@@ -98,7 +96,7 @@ describe 'Vault', ->
     expect(cars.find(new_car.id).model).toEqual("Viper SRT-10")
 
   it 'can read new objects with a specified id', ->
-    new_car_2 = cars.add
+    new_car = cars.add
       id: 12,
       make: "Tesla",
       model: "Roadster",
