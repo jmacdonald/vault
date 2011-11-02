@@ -324,7 +324,7 @@
       return true;
     };
     Vault.prototype.extend = function(object, status) {
-      var sub_collection, _i, _len, _ref;
+      var index, sub_collection, sub_object, _i, _len, _len2, _ref, _ref2;
       if (status == null) {
         status = "clean";
       }
@@ -357,12 +357,43 @@
             if (sub_object[this.options.id_attribute] == null) {
               sub_object[this.options.id_attribute] = this.date.getTime();
             }
+            sub_object["delete"] = __bind(function() {
+              return object[sub_collection]["delete"](sub_object[this.options.id_attribute]);
+            }, this);
             object[sub_collection].push(sub_object);
             if (object.status === "clean") {
+              object.status = "dirty";
+              this.dirty_object_count++;
+            }
+            this.store;
+            return sub_object;
+          }, this);
+          object[sub_collection]["delete"] = __bind(function(id) {
+            var index, sub_object, _len2, _ref2;
+            if (this.locked) {
+              this.errors.push('Cannot delete sub-object, vault is locked.');
+              return false;
+            }
+            _ref2 = object[sub_collection];
+            for (index = 0, _len2 = _ref2.length; index < _len2; index++) {
+              sub_object = _ref2[index];
+              if (sub_object[this.options.id_attribute] === id) {
+                object[sub_collection].splice(index, 1);
+              }
+            }
+            if (object.status === "clean") {
+              object.status = "dirty";
               this.dirty_object_count++;
             }
             return this.store;
           }, this);
+          _ref2 = object[sub_collection];
+          for (index = 0, _len2 = _ref2.length; index < _len2; index++) {
+            sub_object = _ref2[index];
+            sub_object["delete"] = __bind(function() {
+              return object[sub_collection]["delete"](sub_object[this.options.id_attribute]);
+            }, this);
+          }
         }
       }
       return object;

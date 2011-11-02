@@ -239,6 +239,51 @@
       expect(cars.dirty_object_count).toEqual(1);
       return expect(cars.find(3).status).toEqual('deleted');
     });
+    it('can remove new sub-objects via instances', function() {
+      var car, new_part;
+      car = cars.find(3);
+      new_part = car.parts.add({
+        id: 12,
+        name: "Windshield",
+        year: 599.99
+      });
+      new_part["delete"]();
+      expect(cars.objects.length).toEqual(3);
+      expect(cars.dirty_object_count).toEqual(1);
+      return expect(car.parts.length).toEqual(0);
+    });
+    it('can remove new sub-objects via methods', function() {
+      var car, new_part;
+      car = cars.find(3);
+      new_part = car.parts.add({
+        id: 12,
+        name: "Windshield",
+        year: 599.99
+      });
+      car.parts["delete"](12);
+      expect(cars.objects.length).toEqual(3);
+      expect(cars.dirty_object_count).toEqual(1);
+      return expect(car.parts.length).toEqual(0);
+    });
+    it('can remove existing sub-objects via instances', function() {
+      var car, new_part;
+      car = cars.find(1);
+      new_part = car.parts.find(2);
+      new_part["delete"]();
+      expect(cars.objects.length).toEqual(3);
+      expect(cars.dirty_object_count).toEqual(1);
+      expect(car.parts.length).toEqual(1);
+      return expect(car.status).toEqual('dirty');
+    });
+    it('can remove existing sub-objects via methods', function() {
+      var car;
+      car = cars.find(1);
+      car.parts["delete"](2);
+      expect(cars.objects.length).toEqual(3);
+      expect(cars.dirty_object_count).toEqual(1);
+      expect(car.parts.length).toEqual(1);
+      return expect(car.status).toEqual('dirty');
+    });
     it('is storing objects after deleting', function() {
       cars["delete"](3);
       expect(cars.load).toBeTruthy();
