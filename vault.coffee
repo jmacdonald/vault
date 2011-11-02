@@ -339,13 +339,36 @@ class Vault
     object.delete = =>
       @delete(object.id)
     
-    # Add find function to any configured sub-collections that are defined.
+    # Iterate through all of the sub-collections, and if present
+    # extend them with some basic functionality.
     for sub_collection in @options.sub_collections
       if object[sub_collection]?
+        # Find functionality.
         object[sub_collection].find = (id) =>
           for sub_collection_object in object[sub_collection]
             if sub_collection_object[@options.id_attribute] is id
               return sub_collection_object
+        
+        # Add functionality.
+        object[sub_collection].add = (sub_object) =>
+          # Don't bother if the vault is locked.
+          if @locked
+            @errors.push 'Cannot add sub-object, vault is locked.'
+            return false
+
+          # If the sub-object has no id, generate a temporary one and add it to the sub-object.
+          unless sub_object[@options.id_attribute]?
+            sub_object[@options.id_attribute] = @date.getTime()
+
+          # Add the object to the collection.
+          object[sub_collection].push sub_object
+
+          # If the root object was clean, increase the count of dirty objects.
+          if object.status is "clean"
+            @dirty_object_count++
+
+          # Store the collection.
+          @store
 
     return object
 

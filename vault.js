@@ -349,6 +349,20 @@
               }
             }
           }, this);
+          object[sub_collection].add = __bind(function(sub_object) {
+            if (this.locked) {
+              this.errors.push('Cannot add sub-object, vault is locked.');
+              return false;
+            }
+            if (sub_object[this.options.id_attribute] == null) {
+              sub_object[this.options.id_attribute] = this.date.getTime();
+            }
+            object[sub_collection].push(sub_object);
+            if (object.status === "clean") {
+              this.dirty_object_count++;
+            }
+            return this.store;
+          }, this);
         }
       }
       return object;
