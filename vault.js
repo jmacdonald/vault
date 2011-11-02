@@ -324,7 +324,7 @@
       return true;
     };
     Vault.prototype.extend = function(object, status) {
-      var index, sub_collection, sub_object, _i, _len, _len2, _ref, _ref2;
+      var index, sub_collection, sub_object, _i, _len, _len2, _len3, _ref, _ref2, _ref3;
       if (status == null) {
         status = "clean";
       }
@@ -360,6 +360,9 @@
             sub_object["delete"] = __bind(function() {
               return object[sub_collection]["delete"](sub_object[this.options.id_attribute]);
             }, this);
+            sub_object.update = __bind(function() {
+              return object[sub_collection].update(sub_object[this.options.id_attribute]);
+            }, this);
             object[sub_collection].push(sub_object);
             if (object.status === "clean") {
               object.status = "dirty";
@@ -392,6 +395,24 @@
             sub_object = _ref2[index];
             sub_object["delete"] = __bind(function() {
               return object[sub_collection]["delete"](sub_object[this.options.id_attribute]);
+            }, this);
+          }
+          object[sub_collection].update = __bind(function(id) {
+            if (this.locked) {
+              this.errors.push('Cannot update sub-object, vault is locked.');
+              return false;
+            }
+            if (object.status === "clean") {
+              object.status = "dirty";
+              this.dirty_object_count++;
+            }
+            return this.store;
+          }, this);
+          _ref3 = object[sub_collection];
+          for (index = 0, _len3 = _ref3.length; index < _len3; index++) {
+            sub_object = _ref3[index];
+            sub_object.update = __bind(function() {
+              return object[sub_collection].update(sub_object[this.options.id_attribute]);
             }, this);
           }
         }

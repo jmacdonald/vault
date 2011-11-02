@@ -139,6 +139,37 @@ describe 'Vault', ->
     expect(cars.objects.length).toEqual(3)
     expect(cars.dirty_object_count).toEqual(1)
 
+  it 'can update new sub-objects via instances', ->
+    car = cars.find(1)
+    new_part = car.parts.add
+      name: "Exhaust Manifold"
+      price: 249.99
+    
+    new_part.name = "Intake Filter"
+    new_part.price = 19.99
+    new_part.update()
+
+    expect(car.parts.find(new_part.id).name).toEqual("Intake Filter")
+    expect(car.parts.find(new_part.id).price).toEqual(19.99)
+    expect(car.status).toEqual('dirty')
+    expect(cars.objects.length).toEqual(3)
+    expect(car.parts.length).toEqual(3)
+    expect(cars.dirty_object_count).toEqual(1)
+
+  it 'can update existing sub-objects via instances', ->
+    car = cars.find(1)
+    part = car.parts.find(1)
+    part.name = "Exhaust Manifold"
+    part.price = 249.99
+    part.update()
+
+    expect(car.parts.find(1).name).toEqual("Exhaust Manifold")
+    expect(car.parts.find(1).price).toEqual(249.99)
+    expect(cars.find(1).status).toEqual('dirty')
+    expect(cars.objects.length).toEqual(3)
+    expect(car.parts.length).toEqual(2)
+    expect(cars.dirty_object_count).toEqual(1)
+
   it 'is storing objects after updating', ->
     car = cars.find(1)
     car.make = "Toyota"
