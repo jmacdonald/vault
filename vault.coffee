@@ -355,6 +355,9 @@ class Vault
           if @locked
             @errors.push 'Cannot add sub-object, vault is locked.'
             return false
+          
+          # Set a status on the object.
+          sub_object.status = "new"
 
           # If the sub-object has no id, generate a temporary one and add it to the sub-object.
           unless sub_object[@options.id_attribute]?
@@ -441,7 +444,24 @@ class Vault
     delete object_clone.status
     delete object_clone.update
     delete object_clone.delete
-
+    
+    # Iterate through all of the sub-collections, and if present
+    # strip them of their extended functionality.
+    for sub_collection in @options.sub_collections
+      if object_clone[sub_collection]?
+        # Remove the sub-collection's methods.
+        delete object_clone[sub_collection].find
+        delete object_clone[sub_collection].add
+        delete object_clone[sub_collection].delete
+        delete object_clone[sub_collection].update
+        
+        # Iterate through and remove the extended instances' methods.
+        for sub_object in object_clone[sub_collection]
+          if sub_object.status is "new"
+            delete sub_object[@options.id_attribute]
+          delete sub_object.status
+          delete sub_object.delete
+          delete sub_object.update
     return object_clone
 
   # Clone (deep copy) an object.

@@ -71,19 +71,21 @@
       });
       expect(car.parts.length).toEqual(2);
       expect(cars.objects.length).toEqual(3);
-      return expect(cars.dirty_object_count).toEqual(1);
+      expect(cars.dirty_object_count).toEqual(1);
+      return expect(new_part.status).toEqual("new");
     });
     it('can add second-level objects with a specified id', function() {
-      var car, new_part_2;
+      var car, new_part;
       car = cars.find(1);
-      new_part_2 = car.parts.add({
+      new_part = car.parts.add({
         id: 12,
         make: "ECU",
         year: 189.99
       });
       expect(car.parts.length).toEqual(3);
       expect(cars.objects.length).toEqual(3);
-      return expect(cars.dirty_object_count).toEqual(1);
+      expect(cars.dirty_object_count).toEqual(1);
+      return expect(new_part.status).toEqual("new");
     });
     it('is storing objects after adding', function() {
       var new_car;
@@ -166,7 +168,8 @@
       expect(car.status).toEqual('dirty');
       expect(cars.objects.length).toEqual(3);
       expect(car.parts.length).toEqual(3);
-      return expect(cars.dirty_object_count).toEqual(1);
+      expect(cars.dirty_object_count).toEqual(1);
+      return expect(new_part.status).toEqual("new");
     });
     it('can update existing sub-objects via instances', function() {
       var car, part;
@@ -232,6 +235,60 @@
       }
       expect(cars.objects.length).toEqual(3);
       return expect(cars.dirty_object_count).toEqual(0);
+    });
+    it('can strip new sub-objects', function() {
+      var car, key, new_part, part, stripped_car, value, _i, _len, _ref, _ref2, _results;
+      car = cars.find(3);
+      new_part = car.parts.add({
+        name: "Exhaust Manifold",
+        price: 249.99
+      });
+      stripped_car = cars.strip(car);
+      _ref = stripped_car.parts;
+      for (key in _ref) {
+        value = _ref[key];
+        expect(['0']).toContain(key);
+      }
+      _ref2 = stripped_car.parts;
+      _results = [];
+      for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+        part = _ref2[_i];
+        _results.push((function() {
+          var _results2;
+          _results2 = [];
+          for (key in part) {
+            value = part[key];
+            _results2.push(expect(['name', 'price']).toContain(key));
+          }
+          return _results2;
+        })());
+      }
+      return _results;
+    });
+    it('can strip existing sub-objects', function() {
+      var car, key, part, stripped_car, value, _i, _len, _ref, _ref2, _results;
+      car = cars.find(1);
+      stripped_car = cars.strip(car);
+      _ref = stripped_car.parts;
+      for (key in _ref) {
+        value = _ref[key];
+        expect(['0', '1']).toContain(key);
+      }
+      _ref2 = stripped_car.parts;
+      _results = [];
+      for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+        part = _ref2[_i];
+        _results.push((function() {
+          var _results2;
+          _results2 = [];
+          for (key in part) {
+            value = part[key];
+            _results2.push(expect(['id', 'name', 'price']).toContain(key));
+          }
+          return _results2;
+        })());
+      }
+      return _results;
     });
     it('can remove new objects via instances', function() {
       var new_car;

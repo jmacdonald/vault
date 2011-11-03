@@ -64,10 +64,11 @@ describe 'Vault', ->
     expect(car.parts.length).toEqual(2)
     expect(cars.objects.length).toEqual(3)
     expect(cars.dirty_object_count).toEqual(1)
+    expect(new_part.status).toEqual("new")
 
   it 'can add second-level objects with a specified id', ->
     car = cars.find(1)
-    new_part_2 = car.parts.add
+    new_part = car.parts.add
       id: 12,
       make: "ECU",
       year: 189.99
@@ -75,6 +76,7 @@ describe 'Vault', ->
     expect(car.parts.length).toEqual(3)
     expect(cars.objects.length).toEqual(3)
     expect(cars.dirty_object_count).toEqual(1)
+    expect(new_part.status).toEqual("new")
 
   it 'is storing objects after adding', ->
     new_car = cars.add
@@ -155,6 +157,7 @@ describe 'Vault', ->
     expect(cars.objects.length).toEqual(3)
     expect(car.parts.length).toEqual(3)
     expect(cars.dirty_object_count).toEqual(1)
+    expect(new_part.status).toEqual("new")
 
   it 'can update existing sub-objects via instances', ->
     car = cars.find(1)
@@ -213,6 +216,35 @@ describe 'Vault', ->
       expect(['id', 'make', 'model', 'year', 'parts']).toContain key
     expect(cars.objects.length).toEqual(3)
     expect(cars.dirty_object_count).toEqual(0)
+
+  it 'can strip new sub-objects', ->
+    car = cars.find(3)
+    new_part = car.parts.add
+      name: "Exhaust Manifold"
+      price: 249.99
+    stripped_car = cars.strip(car)
+    
+    # Make sure the sub-collection methods have been removed.
+    for key, value of stripped_car.parts
+      expect(['0']).toContain key
+
+    # Make sure the sub-object instance methods have been removed.
+    for part in stripped_car.parts
+      for key, value of part
+        expect(['name', 'price']).toContain key
+
+  it 'can strip existing sub-objects', ->
+    car = cars.find(1)
+    stripped_car = cars.strip(car)
+    
+    # Make sure the sub-collection methods have been removed.
+    for key, value of stripped_car.parts
+      expect(['0', '1']).toContain key
+
+    # Make sure the sub-object instance methods have been removed.
+    for part in stripped_car.parts
+      for key, value of part
+        expect(['id', 'name', 'price']).toContain key
 
   it 'can remove new objects via instances', ->
     new_car = cars.add

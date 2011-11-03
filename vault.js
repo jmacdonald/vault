@@ -354,6 +354,7 @@
               this.errors.push('Cannot add sub-object, vault is locked.');
               return false;
             }
+            sub_object.status = "new";
             if (sub_object[this.options.id_attribute] == null) {
               sub_object[this.options.id_attribute] = this.date.getTime();
             }
@@ -420,7 +421,7 @@
       return object;
     };
     Vault.prototype.strip = function(object) {
-      var object_clone;
+      var object_clone, sub_collection, sub_object, _i, _j, _len, _len2, _ref, _ref2;
       object_clone = this.clone(object);
       if (object_clone.status === "new") {
         delete object_clone[this.options.id_attribute];
@@ -428,6 +429,26 @@
       delete object_clone.status;
       delete object_clone.update;
       delete object_clone["delete"];
+      _ref = this.options.sub_collections;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        sub_collection = _ref[_i];
+        if (object_clone[sub_collection] != null) {
+          delete object_clone[sub_collection].find;
+          delete object_clone[sub_collection].add;
+          delete object_clone[sub_collection]["delete"];
+          delete object_clone[sub_collection].update;
+          _ref2 = object_clone[sub_collection];
+          for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
+            sub_object = _ref2[_j];
+            if (sub_object.status === "new") {
+              delete sub_object[this.options.id_attribute];
+            }
+            delete sub_object.status;
+            delete sub_object["delete"];
+            delete sub_object.update;
+          }
+        }
+      }
       return object_clone;
     };
     Vault.prototype.clone = function(object) {
