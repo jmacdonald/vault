@@ -3,7 +3,7 @@
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
   Vault = (function() {
     function Vault(name, urls, options) {
-      var option, value;
+      var option, sub_collection, value, _i, _len, _ref;
       if (options == null) {
         options = {};
       }
@@ -49,6 +49,27 @@
         } else {
           this.reload(this.options.after_load);
         }
+      }
+      _ref = this.options.sub_collections;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        sub_collection = _ref[_i];
+        this[sub_collection] = {
+          'find': __bind(function(id) {
+            var object, sub_object, _j, _k, _len2, _len3, _ref2, _ref3;
+            _ref2 = this.objects;
+            for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
+              object = _ref2[_j];
+              _ref3 = object[sub_collection];
+              for (_k = 0, _len3 = _ref3.length; _k < _len3; _k++) {
+                sub_object = _ref3[_k];
+                if (sub_object[this.options.id_attribute] === id) {
+                  return sub_object;
+                }
+              }
+            }
+            return false;
+          }, this)
+        };
       }
     }
     Vault.prototype.each = function(logic) {

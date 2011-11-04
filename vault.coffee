@@ -55,6 +55,19 @@ class Vault
             @errors.push "Offline data failed to load. Could not load live data as browser is offline."
       else
         @reload(@options.after_load)
+    
+    # Create convenience attributes for sub-collections.
+    for sub_collection in @options.sub_collections
+      @[sub_collection] = {
+        'find': (id) =>
+          for object in @objects
+            for sub_object in object[sub_collection]
+              if sub_object[@options.id_attribute] is id
+                return sub_object
+            
+          # Object with specified id couldn't be found.
+          return false
+      }
 
   # Iterate over non-deleted items in the collection.
   each: (logic) ->

@@ -35,6 +35,11 @@ describe 'Vault', ->
     part = car.parts.find(3)
     
     expect(part.name).toEqual("Turbocharger")
+  
+  it 'can find second-level objects using the convenience class', ->
+    part = cars.parts.find(3)
+    
+    expect(part.name).toEqual("Turbocharger")
 
   it 'can add objects', ->
     new_car = cars.add

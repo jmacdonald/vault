@@ -41,6 +41,11 @@
       part = car.parts.find(3);
       return expect(part.name).toEqual("Turbocharger");
     });
+    it('can find second-level objects using the convenience class', function() {
+      var part;
+      part = cars.parts.find(3);
+      return expect(part.name).toEqual("Turbocharger");
+    });
     it('can add objects', function() {
       var new_car;
       new_car = cars.add({
