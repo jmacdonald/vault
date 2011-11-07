@@ -58,15 +58,16 @@ class Vault
     
     # Create convenience attributes for sub-collections.
     for sub_collection in @options.sub_collections
-      @[sub_collection] = {
-        'find': (id) =>
-          for object in @objects
-            for sub_object in object[sub_collection]
-              if sub_object[@options.id_attribute] is id
-                return sub_object
-            
-          # Object with specified id couldn't be found.
-          return false
+      do (sub_collection) =>
+        @[sub_collection] = {
+          'find': (id) =>
+            for object in @objects
+              for sub_object in object[sub_collection]
+                if sub_object[@options.id_attribute] is id
+                  return sub_object
+              
+            # Object with specified id couldn't be found.
+            return false
       }
 
   # Iterate over non-deleted items in the collection.
@@ -355,94 +356,94 @@ class Vault
     # Iterate through all of the sub-collections, and if present
     # extend them with some basic functionality.
     for sub_collection in @options.sub_collections
-      if object[sub_collection]?
-        # Find functionality.
-        object[sub_collection].find = (id) =>
-          for sub_collection_object in object[sub_collection]
-            if sub_collection_object[@options.id_attribute] is id
-              return sub_collection_object
-        
-        # Add functionality.
-        object[sub_collection].add = (sub_object) =>
-          # Don't bother if the vault is locked.
-          if @locked
-            @errors.push 'Cannot add sub-object, vault is locked.'
-            return false
+      do (sub_collection) =>
+        if object[sub_collection]?
+          # Find functionality.
+          object[sub_collection].find = (id) =>
+            for sub_collection_object in object[sub_collection]
+              if sub_collection_object[@options.id_attribute] is id
+                return sub_collection_object
           
-          # Set a status on the object.
-          sub_object.status = "new"
+          # Add functionality.
+          object[sub_collection].add = (sub_object) =>
+            # Don't bother if the vault is locked.
+            if @locked
+              @errors.push 'Cannot add sub-object, vault is locked.'
+              return false
+            
+            # Set a status on the object.
+            sub_object.status = "new"
 
-          # If the sub-object has no id, generate a temporary one and add it to the sub-object.
-          unless sub_object[@options.id_attribute]?
-            sub_object[@options.id_attribute] = @date.getTime()
-          
-          # Add a delete method to the sub-object.
-          sub_object.delete = =>
-            object[sub_collection].delete(sub_object[@options.id_attribute])
-          
-          # Add an update method to the sub-object.
-          sub_object.update = =>
-            object[sub_collection].update(sub_object[@options.id_attribute])
+            # If the sub-object has no id, generate a temporary one and add it to the sub-object.
+            unless sub_object[@options.id_attribute]?
+              sub_object[@options.id_attribute] = @date.getTime()
+            
+            # Add a delete method to the sub-object.
+            sub_object.delete = =>
+              object[sub_collection].delete(sub_object[@options.id_attribute])
+            
+            # Add an update method to the sub-object.
+            sub_object.update = =>
+              object[sub_collection].update(sub_object[@options.id_attribute])
 
-          # Add the object to the collection.
-          object[sub_collection].push sub_object
+            # Add the object to the collection.
+            object[sub_collection].push sub_object
 
-          # If the root object was clean, flag it and increase the count of dirty objects.
-          if object.status is "clean"
-            object.status = "dirty"
-            @dirty_object_count++
+            # If the root object was clean, flag it and increase the count of dirty objects.
+            if object.status is "clean"
+              object.status = "dirty"
+              @dirty_object_count++
 
-          # Store the collection.
-          @store
+            # Store the collection.
+            @store
+            
+            return sub_object
           
-          return sub_object
-        
-        # Delete functionality.
-        object[sub_collection].delete = (id) =>
-          # Don't bother if the vault is locked.
-          if @locked
-            @errors.push 'Cannot delete sub-object, vault is locked.'
-            return false
+          # Delete functionality.
+          object[sub_collection].delete = (id) =>
+            # Don't bother if the vault is locked.
+            if @locked
+              @errors.push 'Cannot delete sub-object, vault is locked.'
+              return false
+            
+            # Remove the sub-object from its collection.
+            for sub_object, index in object[sub_collection]
+              if sub_object[@options.id_attribute] is id
+                object[sub_collection].splice(index, 1)
+
+            # If the root object was clean, flag it and increase the count of dirty objects.
+            if object.status is "clean"
+              object.status = "dirty"
+              @dirty_object_count++
+
+            # Store the collection.
+            @store
           
-          # Remove the sub-object from its collection.
+          # Add a delete instance method for pre-existing objects.
           for sub_object, index in object[sub_collection]
-            if sub_object[@options.id_attribute] is id
-              object[sub_collection].splice(index, 1)
-
-          # If the root object was clean, flag it and increase the count of dirty objects.
-          if object.status is "clean"
-            object.status = "dirty"
-            @dirty_object_count++
-
-          # Store the collection.
-          @store
-        
-        # Add a delete instance method for pre-existing objects.
-        for sub_object, index in object[sub_collection]
-          sub_object.delete = =>
-            object[sub_collection].delete(sub_object[@options.id_attribute])
-        
-        # Update functionality.
-        object[sub_collection].update = (id) =>
-          # Don't bother if the vault is locked.
-          if @locked
-            @errors.push 'Cannot update sub-object, vault is locked.'
-            return false
-
-          # If the root object was clean, flag it and increase the count of dirty objects.
-          if object.status is "clean"
-            object.status = "dirty"
-            @dirty_object_count++
-
-          # Store the collection.
-          @store
-        
-        # Add an update instance method for pre-existing objects.
-        for sub_object, index in object[sub_collection]
-          sub_object.update = =>
-            object[sub_collection].update(sub_object[@options.id_attribute])
+            sub_object.delete = =>
+              object[sub_collection].delete(sub_object[@options.id_attribute])
           
+          # Update functionality.
+          object[sub_collection].update = (id) =>
+            # Don't bother if the vault is locked.
+            if @locked
+              @errors.push 'Cannot update sub-object, vault is locked.'
+              return false
 
+            # If the root object was clean, flag it and increase the count of dirty objects.
+            if object.status is "clean"
+              object.status = "dirty"
+              @dirty_object_count++
+
+            # Store the collection.
+            @store
+          
+          # Add an update instance method for pre-existing objects.
+          for sub_object, index in object[sub_collection]
+            sub_object.update = =>
+              object[sub_collection].update(sub_object[@options.id_attribute])
+      
     return object
 
   # Return a copy of an object with vault-specific variables and functions removed.

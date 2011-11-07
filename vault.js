@@ -3,7 +3,7 @@
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
   Vault = (function() {
     function Vault(name, urls, options) {
-      var option, sub_collection, value, _i, _len, _ref;
+      var option, sub_collection, value, _fn, _i, _len, _ref;
       if (options == null) {
         options = {};
       }
@@ -51,9 +51,8 @@
         }
       }
       _ref = this.options.sub_collections;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        sub_collection = _ref[_i];
-        this[sub_collection] = {
+      _fn = __bind(function(sub_collection) {
+        return this[sub_collection] = {
           'find': __bind(function(id) {
             var object, sub_object, _j, _k, _len2, _len3, _ref2, _ref3;
             _ref2 = this.objects;
@@ -70,6 +69,10 @@
             return false;
           }, this)
         };
+      }, this);
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        sub_collection = _ref[_i];
+        _fn(sub_collection);
       }
     }
     Vault.prototype.each = function(logic) {
@@ -345,7 +348,7 @@
       return true;
     };
     Vault.prototype.extend = function(object, status) {
-      var index, sub_collection, sub_object, _i, _len, _len2, _len3, _ref, _ref2, _ref3;
+      var sub_collection, _fn, _i, _len, _ref;
       if (status == null) {
         status = "clean";
       }
@@ -357,8 +360,8 @@
         return this["delete"](object.id);
       }, this);
       _ref = this.options.sub_collections;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        sub_collection = _ref[_i];
+      _fn = __bind(function(sub_collection) {
+        var index, sub_object, _len2, _len3, _ref2, _ref3, _results;
         if (object[sub_collection] != null) {
           object[sub_collection].find = __bind(function(id) {
             var sub_collection_object, _j, _len2, _ref2;
@@ -431,13 +434,19 @@
             return this.store;
           }, this);
           _ref3 = object[sub_collection];
+          _results = [];
           for (index = 0, _len3 = _ref3.length; index < _len3; index++) {
             sub_object = _ref3[index];
-            sub_object.update = __bind(function() {
+            _results.push(sub_object.update = __bind(function() {
               return object[sub_collection].update(sub_object[this.options.id_attribute]);
-            }, this);
+            }, this));
           }
+          return _results;
         }
+      }, this);
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        sub_collection = _ref[_i];
+        _fn(sub_collection);
       }
       return object;
     };

@@ -9,7 +9,7 @@
     beforeEach(function() {
       cars = new Vault('cars', urls, {
         offline: true,
-        sub_collections: ['parts']
+        sub_collections: ['parts', 'dealers']
       });
       return waitsFor(function() {
         return !cars.locked;
@@ -35,15 +35,17 @@
       car = cars.find(1);
       return expect(car.model).toEqual("Shelby Mustang GT500");
     });
+    it('can find second-level objects using the convenience class', function() {
+      var dealer, part;
+      part = cars.parts.find(3);
+      dealer = cars.dealers.find(1);
+      expect(part.name).toEqual("Turbocharger");
+      return expect(dealer.name).toEqual("Super Car Mart");
+    });
     it('can find second-level objects', function() {
       var car, part;
       car = cars.find(2);
       part = car.parts.find(3);
-      return expect(part.name).toEqual("Turbocharger");
-    });
-    it('can find second-level objects using the convenience class', function() {
-      var part;
-      part = cars.parts.find(3);
       return expect(part.name).toEqual("Turbocharger");
     });
     it('can add objects', function() {
@@ -236,7 +238,7 @@
       stripped_object = cars.strip(cars.find(3));
       for (key in stripped_object) {
         value = stripped_object[key];
-        expect(['id', 'make', 'model', 'year', 'parts']).toContain(key);
+        expect(['id', 'make', 'model', 'year', 'parts', 'dealers']).toContain(key);
       }
       expect(cars.objects.length).toEqual(3);
       return expect(cars.dirty_object_count).toEqual(0);

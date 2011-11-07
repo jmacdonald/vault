@@ -14,6 +14,12 @@
         "name": "Head Gasket",
         "price": 9.99
       }
+    ],
+    "dealers": [
+      {
+        "id": 1,
+        "name": "Super Car Mart"
+      }
     ]
   },
   {
@@ -27,13 +33,15 @@
         "name": "Turbocharger",
         "price": 2199.99
       }
-    ]
+    ],
+    "dealers": []
   },
   {
     "id": 3,
     "make": "Nissan",
     "model": "370Z Nismo",
     "year": 2011,
-    "parts": []
+    "parts": [],
+    "dealers": []
   }
 ]

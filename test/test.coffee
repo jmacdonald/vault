@@ -7,7 +7,7 @@ describe 'Vault', ->
   beforeEach ->
     cars = new Vault 'cars', urls,
       offline: true
-      sub_collections: ['parts']
+      sub_collections: ['parts', 'dealers']
     waitsFor ->
       not cars.locked
   
@@ -30,14 +30,16 @@ describe 'Vault', ->
     
     expect(car.model).toEqual("Shelby Mustang GT500")
   
+  it 'can find second-level objects using the convenience class', ->
+    part = cars.parts.find(3)
+    dealer = cars.dealers.find(1)
+    
+    expect(part.name).toEqual("Turbocharger")
+    expect(dealer.name).toEqual("Super Car Mart")
+  
   it 'can find second-level objects', ->
     car = cars.find(2)
     part = car.parts.find(3)
-    
-    expect(part.name).toEqual("Turbocharger")
-  
-  it 'can find second-level objects using the convenience class', ->
-    part = cars.parts.find(3)
     
     expect(part.name).toEqual("Turbocharger")
 
@@ -218,7 +220,7 @@ describe 'Vault', ->
     stripped_object = cars.strip(cars.find(3))
 
     for key, value of stripped_object
-      expect(['id', 'make', 'model', 'year', 'parts']).toContain key
+      expect(['id', 'make', 'model', 'year', 'parts', 'dealers']).toContain key
     expect(cars.objects.length).toEqual(3)
     expect(cars.dirty_object_count).toEqual(0)
 
