@@ -226,6 +226,23 @@
       expect(cars.objects.length).toEqual(3);
       return expect(cars.dirty_object_count).toEqual(1);
     });
+    it('only accepts updates for pre-defined attributes on objects', function() {
+      var car;
+      car = cars.find(1);
+      car.update({
+        make: "Toyota",
+        model: "Supra",
+        year: 2002,
+        trim: "GTS"
+      });
+      expect(cars.find(1).make).toEqual("Toyota");
+      expect(cars.find(1).model).toEqual("Supra");
+      expect(cars.find(1).year).toEqual(2002);
+      expect(cars.find(1).trim).toBeUndefined();
+      expect(cars.find(1).status).toEqual('dirty');
+      expect(cars.objects.length).toEqual(3);
+      return expect(cars.dirty_object_count).toEqual(1);
+    });
     it('can update new sub-objects by passing updated attributes as arguments', function() {
       var car, new_part;
       car = cars.find(1);
@@ -255,6 +272,23 @@
       });
       expect(car.parts.find(1).name).toEqual("Exhaust Manifold");
       expect(car.parts.find(1).price).toEqual(249.99);
+      expect(cars.find(1).status).toEqual('dirty');
+      expect(cars.objects.length).toEqual(3);
+      expect(car.parts.length).toEqual(2);
+      return expect(cars.dirty_object_count).toEqual(1);
+    });
+    it('only accepts updates for pre-defined attributes on sub-objects', function() {
+      var car, part;
+      car = cars.find(1);
+      part = car.parts.find(1);
+      part.update({
+        name: "Exhaust Manifold",
+        price: 249.99,
+        condition: "used"
+      });
+      expect(car.parts.find(1).name).toEqual("Exhaust Manifold");
+      expect(car.parts.find(1).price).toEqual(249.99);
+      expect(car.parts.find(1).condition).toBeUndefined();
       expect(cars.find(1).status).toEqual('dirty');
       expect(cars.objects.length).toEqual(3);
       expect(car.parts.length).toEqual(2);

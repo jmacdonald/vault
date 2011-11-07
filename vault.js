@@ -110,25 +110,33 @@
       }
       return false;
     };
-    Vault.prototype.update = function(id) {
-      var index, object, _len, _ref;
+    Vault.prototype.update = function(id, attributes) {
+      var attribute, object, value;
       if (this.locked) {
         this.errors.push('Cannot update, vault is locked.');
         return false;
       }
-      _ref = this.objects;
-      for (index = 0, _len = _ref.length; index < _len; index++) {
-        object = _ref[index];
-        if (object[this.options.id_attribute] === id) {
-          if (object.status === "clean") {
-            object.status = "dirty";
-            this.dirty_object_count++;
+      object = this.find(id);
+      if (object == null) {
+        this.errors.push('Cannot update, object not found.');
+        return false;
+      }
+      if (object.status === "clean") {
+        object.status = "dirty";
+        this.dirty_object_count++;
+      }
+      if (attributes != null) {
+        for (attribute in attributes) {
+          value = attributes[attribute];
+          if (object[attribute] != null) {
+            object[attribute] = value;
+          } else {
+
           }
-          this.store;
-          return true;
         }
       }
-      return false;
+      this.store;
+      return true;
     };
     Vault.prototype["delete"] = function(id) {
       var index, object, _len, _ref;
@@ -353,15 +361,15 @@
         status = "clean";
       }
       object.status = status;
-      object.update = __bind(function() {
-        return this.update(object.id);
+      object.update = __bind(function(attributes) {
+        return this.update(object.id, attributes);
       }, this);
       object["delete"] = __bind(function() {
         return this["delete"](object.id);
       }, this);
       _ref = this.options.sub_collections;
       _fn = __bind(function(sub_collection) {
-        var index, sub_object, _len2, _len3, _ref2, _ref3, _results;
+        var index, sub_object, _j, _len2, _len3, _ref2, _ref3, _results;
         if (object[sub_collection] != null) {
           object[sub_collection].find = __bind(function(id) {
             var sub_collection_object, _j, _len2, _ref2;
@@ -385,8 +393,8 @@
             sub_object["delete"] = __bind(function() {
               return object[sub_collection]["delete"](sub_object[this.options.id_attribute]);
             }, this);
-            sub_object.update = __bind(function() {
-              return object[sub_collection].update(sub_object[this.options.id_attribute]);
+            sub_object.update = __bind(function(attributes) {
+              return object[sub_collection].update(sub_object[this.options.id_attribute], attributes);
             }, this);
             object[sub_collection].push(sub_object);
             if (object.status === "clean") {
@@ -422,24 +430,40 @@
               return object[sub_collection]["delete"](sub_object[this.options.id_attribute]);
             }, this);
           }
-          object[sub_collection].update = __bind(function(id) {
+          object[sub_collection].update = __bind(function(id, attributes) {
+            var attribute, value;
             if (this.locked) {
               this.errors.push('Cannot update sub-object, vault is locked.');
+              return false;
+            }
+            sub_object = object[sub_collection].find(id);
+            if (sub_object == null) {
+              this.errors.push('Cannot update, sub-object not found.');
               return false;
             }
             if (object.status === "clean") {
               object.status = "dirty";
               this.dirty_object_count++;
             }
+            if (attributes != null) {
+              for (attribute in attributes) {
+                value = attributes[attribute];
+                if (sub_object[attribute] != null) {
+                  sub_object[attribute] = value;
+                }
+              }
+            }
             return this.store;
           }, this);
           _ref3 = object[sub_collection];
           _results = [];
-          for (index = 0, _len3 = _ref3.length; index < _len3; index++) {
-            sub_object = _ref3[index];
-            _results.push(sub_object.update = __bind(function() {
-              return object[sub_collection].update(sub_object[this.options.id_attribute]);
-            }, this));
+          for (_j = 0, _len3 = _ref3.length; _j < _len3; _j++) {
+            sub_object = _ref3[_j];
+            _results.push(__bind(function(sub_object) {
+              return sub_object.update = __bind(function(attributes) {
+                return object[sub_collection].update(sub_object[this.options.id_attribute], attributes);
+              }, this);
+            }, this)(sub_object));
           }
           return _results;
         }

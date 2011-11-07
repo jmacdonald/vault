@@ -112,27 +112,35 @@ class Vault
     return false
 
   # Update an existing item in the collection.
-  update: (id) ->
+  update: (id, attributes) ->
     # Don't bother if the vault is locked.
     if @locked
       @errors.push 'Cannot update, vault is locked.'
       return false
+            
+    # Get the object; return if it's undefined.
+    object = @find(id)
+    unless object?
+      @errors.push 'Cannot update, object not found.'
+      return false
 
-    # Find the object and flag it as dirty.
-    for object, index in @objects
-      if object[@options.id_attribute] == id
-        if object.status is "clean"
-          object.status = "dirty"
-          @dirty_object_count++
+    # Flag it as dirty.
+    if object.status is "clean"
+      object.status = "dirty"
+      @dirty_object_count++
+            
+    # Merge in the updated attributes, if they're specified and defined on the object.
+    if attributes?
+      for attribute, value of attributes
+        if object[attribute]?
+          object[attribute] = value
+        else
 
-        # Store the collection.
-        @store
+    # Store the collection.
+    @store
 
-        # Update was successful.
-        return true
-
-    # Object not found.
-    return false
+    # Update was successful.
+    return true
 
   # Flag an object in the collection for deletion,
   # or if the object is new, remove it.
@@ -348,8 +356,8 @@ class Vault
     
     # Add simple variables and methods.
     object.status = status
-    object.update = =>
-      @update(object.id)
+    object.update = (attributes) =>
+      @update(object.id, attributes)
     object.delete = =>
       @delete(object.id)
     
@@ -383,8 +391,8 @@ class Vault
               object[sub_collection].delete(sub_object[@options.id_attribute])
             
             # Add an update method to the sub-object.
-            sub_object.update = =>
-              object[sub_collection].update(sub_object[@options.id_attribute])
+            sub_object.update = (attributes) =>
+              object[sub_collection].update(sub_object[@options.id_attribute], attributes)
 
             # Add the object to the collection.
             object[sub_collection].push sub_object
@@ -425,24 +433,37 @@ class Vault
               object[sub_collection].delete(sub_object[@options.id_attribute])
           
           # Update functionality.
-          object[sub_collection].update = (id) =>
+          object[sub_collection].update = (id, attributes) =>
             # Don't bother if the vault is locked.
             if @locked
               @errors.push 'Cannot update sub-object, vault is locked.'
+              return false
+            
+            # Get the sub-object; return if it's undefined.
+            sub_object = object[sub_collection].find(id)
+            unless sub_object?
+              @errors.push 'Cannot update, sub-object not found.'
               return false
 
             # If the root object was clean, flag it and increase the count of dirty objects.
             if object.status is "clean"
               object.status = "dirty"
               @dirty_object_count++
-
+            
+            # Merge in the updated attributes, if they're specified and defined on the sub-object.
+            if attributes?
+              for attribute, value of attributes
+                if sub_object[attribute]?
+                  sub_object[attribute] = value
+            
             # Store the collection.
             @store
           
           # Add an update instance method for pre-existing objects.
-          for sub_object, index in object[sub_collection]
-            sub_object.update = =>
-              object[sub_collection].update(sub_object[@options.id_attribute])
+          for sub_object in object[sub_collection]
+            do (sub_object) =>
+              sub_object.update = (attributes) =>
+                object[sub_collection].update(sub_object[@options.id_attribute], attributes)
       
     return object
 
