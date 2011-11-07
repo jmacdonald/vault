@@ -228,6 +228,24 @@ describe 'Vault', ->
     expect(cars.objects.length).toEqual(3)
     expect(cars.dirty_object_count).toEqual(1)
 
+  it 'does not accept updates to id attributes on objects', ->
+    car = cars.find(1)
+    car.update
+      id: 213
+      make: "Toyota"
+      model: "Supra"
+      year: 2002
+      trim: "GTS"
+
+    expect(cars.find(1).id).toEqual(1)
+    expect(cars.find(1).make).toEqual("Toyota")
+    expect(cars.find(1).model).toEqual("Supra")
+    expect(cars.find(1).year).toEqual(2002)
+    expect(cars.find(1).trim).toBeUndefined()
+    expect(cars.find(1).status).toEqual('dirty')
+    expect(cars.objects.length).toEqual(3)
+    expect(cars.dirty_object_count).toEqual(1)
+
   it 'can update new sub-objects by passing updated attributes as arguments', ->
     car = cars.find(1)
     new_part = car.parts.add
@@ -270,6 +288,24 @@ describe 'Vault', ->
       price: 249.99
       condition: "used"
 
+    expect(car.parts.find(1).name).toEqual("Exhaust Manifold")
+    expect(car.parts.find(1).price).toEqual(249.99)
+    expect(car.parts.find(1).condition).toBeUndefined()
+    expect(cars.find(1).status).toEqual('dirty')
+    expect(cars.objects.length).toEqual(3)
+    expect(car.parts.length).toEqual(2)
+    expect(cars.dirty_object_count).toEqual(1)
+
+  it 'does not accept updates to id attributes on sub-objects', ->
+    car = cars.find(1)
+    part = car.parts.find(1)
+
+    part.update
+      id: 213
+      name: "Exhaust Manifold"
+      price: 249.99
+
+    expect(car.parts.find(1).id).toEqual(1)
     expect(car.parts.find(1).name).toEqual("Exhaust Manifold")
     expect(car.parts.find(1).price).toEqual(249.99)
     expect(car.parts.find(1).condition).toBeUndefined()
