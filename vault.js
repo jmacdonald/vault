@@ -110,11 +110,14 @@
       }
       return false;
     };
-    Vault.prototype.update = function(id, attributes) {
+    Vault.prototype.update = function(attributes, id) {
       var attribute, object, value;
       if (this.locked) {
         this.errors.push('Cannot update, vault is locked.');
         return false;
+      }
+      if (id == null) {
+        id = attributes[this.options.id_attribute];
       }
       object = this.find(id);
       if (object == null) {
@@ -130,8 +133,6 @@
           value = attributes[attribute];
           if ((object[attribute] != null) && attribute !== this.options['id_attribute']) {
             object[attribute] = value;
-          } else {
-            console.log(attribute);
           }
         }
       }
@@ -362,7 +363,7 @@
       }
       object.status = status;
       object.update = __bind(function(attributes) {
-        return this.update(object.id, attributes);
+        return this.update(attributes, object.id);
       }, this);
       object["delete"] = __bind(function() {
         return this["delete"](object.id);
@@ -394,7 +395,7 @@
               return object[sub_collection]["delete"](sub_object[this.options.id_attribute]);
             }, this);
             sub_object.update = __bind(function(attributes) {
-              return object[sub_collection].update(sub_object[this.options.id_attribute], attributes);
+              return object[sub_collection].update(attributes, sub_object[this.options.id_attribute]);
             }, this);
             object[sub_collection].push(sub_object);
             if (object.status === "clean") {
@@ -430,11 +431,14 @@
               return object[sub_collection]["delete"](sub_object[this.options.id_attribute]);
             }, this);
           }
-          object[sub_collection].update = __bind(function(id, attributes) {
+          object[sub_collection].update = __bind(function(attributes, id) {
             var attribute, value;
             if (this.locked) {
               this.errors.push('Cannot update sub-object, vault is locked.');
               return false;
+            }
+            if (id == null) {
+              id = attributes[this.options.id_attribute];
             }
             sub_object = object[sub_collection].find(id);
             if (sub_object == null) {
@@ -461,7 +465,7 @@
             sub_object = _ref3[_j];
             _results.push(__bind(function(sub_object) {
               return sub_object.update = __bind(function(attributes) {
-                return object[sub_collection].update(sub_object[this.options.id_attribute], attributes);
+                return object[sub_collection].update(attributes, sub_object[this.options.id_attribute]);
               }, this);
             }, this)(sub_object));
           }

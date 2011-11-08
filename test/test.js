@@ -332,42 +332,6 @@
       expect(car.parts.length).toEqual(2);
       return expect(cars.dirty_object_count).toEqual(1);
     });
-    it('can update new sub-objects by passing updated attributes as arguments to sub-collection static methods', function() {
-      var car, new_part;
-      car = cars.find(1);
-      new_part = car.parts.add({
-        name: "Exhaust Manifold",
-        price: 249.99
-      });
-      cars.parts.update({
-        id: new_part.id,
-        name: "Intake Filter",
-        price: 19.99
-      });
-      expect(car.parts.find(new_part.id).name).toEqual("Intake Filter");
-      expect(car.parts.find(new_part.id).price).toEqual(19.99);
-      expect(car.status).toEqual('dirty');
-      expect(cars.objects.length).toEqual(3);
-      expect(car.parts.length).toEqual(3);
-      expect(cars.dirty_object_count).toEqual(1);
-      return expect(new_part.status).toEqual("new");
-    });
-    it('can update existing sub-objects by passing updated attributes as arguments to sub-collection static methods', function() {
-      var car, part;
-      car = cars.find(1);
-      part = car.parts.find(1);
-      cars.parts.update({
-        id: part.id,
-        name: "Exhaust Manifold",
-        price: 249.99
-      });
-      expect(car.parts.find(1).name).toEqual("Exhaust Manifold");
-      expect(car.parts.find(1).price).toEqual(249.99);
-      expect(cars.find(1).status).toEqual('dirty');
-      expect(cars.objects.length).toEqual(3);
-      expect(car.parts.length).toEqual(2);
-      return expect(cars.dirty_object_count).toEqual(1);
-    });
     it('only accepts updates for pre-defined attributes on sub-objects', function() {
       var car, part;
       car = cars.find(1);

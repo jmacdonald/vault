@@ -68,7 +68,7 @@ class Vault
               
             # Object with specified id couldn't be found.
             return false
-      }
+        }
 
   # Iterate over non-deleted items in the collection.
   each: (logic) ->
@@ -112,11 +112,14 @@ class Vault
     return false
 
   # Update an existing item in the collection.
-  update: (id, attributes) ->
+  update: (attributes, id) ->
     # Don't bother if the vault is locked.
     if @locked
       @errors.push 'Cannot update, vault is locked.'
       return false
+            
+    # Get the id of the object from the attributes if it's not explicitly defined.
+    id = attributes[@options.id_attribute] unless id?
             
     # Get the object; return if it's undefined.
     object = @find(id)
@@ -134,8 +137,6 @@ class Vault
       for attribute, value of attributes
         if object[attribute]? and attribute isnt @options['id_attribute']
           object[attribute] = value
-        else
-          console.log attribute
 
     # Store the collection.
     @store
@@ -358,7 +359,7 @@ class Vault
     # Add simple variables and methods.
     object.status = status
     object.update = (attributes) =>
-      @update(object.id, attributes)
+      @update(attributes, object.id)
     object.delete = =>
       @delete(object.id)
     
@@ -393,7 +394,7 @@ class Vault
             
             # Add an update method to the sub-object.
             sub_object.update = (attributes) =>
-              object[sub_collection].update(sub_object[@options.id_attribute], attributes)
+              object[sub_collection].update(attributes, sub_object[@options.id_attribute])
 
             # Add the object to the collection.
             object[sub_collection].push sub_object
@@ -434,11 +435,14 @@ class Vault
               object[sub_collection].delete(sub_object[@options.id_attribute])
           
           # Update functionality.
-          object[sub_collection].update = (id, attributes) =>
+          object[sub_collection].update = (attributes, id) =>
             # Don't bother if the vault is locked.
             if @locked
               @errors.push 'Cannot update sub-object, vault is locked.'
               return false
+            
+            # Get the id of the sub-object from the attributes if it's not explicitly defined.
+            id = attributes[@options.id_attribute] unless id?
             
             # Get the sub-object; return if it's undefined.
             sub_object = object[sub_collection].find(id)
@@ -464,7 +468,7 @@ class Vault
           for sub_object in object[sub_collection]
             do (sub_object) =>
               sub_object.update = (attributes) =>
-                object[sub_collection].update(sub_object[@options.id_attribute], attributes)
+                object[sub_collection].update(attributes, sub_object[@options.id_attribute])
       
     return object
 
