@@ -211,6 +211,41 @@ describe 'Vault', ->
     expect(cars.find(1).status).toEqual('dirty')
     expect(cars.objects.length).toEqual(3)
     expect(cars.dirty_object_count).toEqual(1)
+  
+  it 'can update new objects by passing updated attributes as arguments to static methods', ->
+    new_car = cars.add
+      make: "Dodge",
+      model: "Viper SRT-10",
+      year: 2008
+
+    cars.update
+      id: new_car.id
+      make: "Lamborghini"
+      model: "Murcielago"
+      year: 2009
+
+    expect(cars.find(new_car.id).make).toEqual("Lamborghini")
+    expect(cars.find(new_car.id).model).toEqual("Murcielago")
+    expect(cars.find(new_car.id).year).toEqual(2009)
+    expect(cars.find(new_car.id).status).toEqual('new')
+    expect(cars.objects.length).toEqual(4)
+    expect(cars.dirty_object_count).toEqual(1)
+
+  it 'can update existing objects by passing updated attributes as arguments to static methods', ->
+    car = cars.find(1)
+
+    cars.update
+      id: car.id
+      make: "Toyota"
+      model: "Supra"
+      year: 2002
+
+    expect(cars.find(1).make).toEqual("Toyota")
+    expect(cars.find(1).model).toEqual("Supra")
+    expect(cars.find(1).year).toEqual(2002)
+    expect(cars.find(1).status).toEqual('dirty')
+    expect(cars.objects.length).toEqual(3)
+    expect(cars.dirty_object_count).toEqual(1)
 
   it 'only accepts updates for pre-defined attributes on objects', ->
     car = cars.find(1)
@@ -269,6 +304,41 @@ describe 'Vault', ->
     part = car.parts.find(1)
 
     part.update
+      name: "Exhaust Manifold"
+      price: 249.99
+
+    expect(car.parts.find(1).name).toEqual("Exhaust Manifold")
+    expect(car.parts.find(1).price).toEqual(249.99)
+    expect(cars.find(1).status).toEqual('dirty')
+    expect(cars.objects.length).toEqual(3)
+    expect(car.parts.length).toEqual(2)
+    expect(cars.dirty_object_count).toEqual(1)
+
+  it 'can update new sub-objects by passing updated attributes as arguments to sub-collection static methods', ->
+    car = cars.find(1)
+    new_part = car.parts.add
+      name: "Exhaust Manifold"
+      price: 249.99
+    
+    cars.parts.update
+      id: new_part.id
+      name: "Intake Filter"
+      price: 19.99
+
+    expect(car.parts.find(new_part.id).name).toEqual("Intake Filter")
+    expect(car.parts.find(new_part.id).price).toEqual(19.99)
+    expect(car.status).toEqual('dirty')
+    expect(cars.objects.length).toEqual(3)
+    expect(car.parts.length).toEqual(3)
+    expect(cars.dirty_object_count).toEqual(1)
+    expect(new_part.status).toEqual("new")
+
+  it 'can update existing sub-objects by passing updated attributes as arguments to sub-collection static methods', ->
+    car = cars.find(1)
+    part = car.parts.find(1)
+
+    cars.parts.update
+      id: part.id
       name: "Exhaust Manifold"
       price: 249.99
 
