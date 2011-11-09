@@ -63,7 +63,7 @@ class Vault
           'find': (id) =>
             for object in @objects
               for sub_object in object[sub_collection]
-                if sub_object[@options.id_attribute] is id
+                if sub_object[@options.id_attribute] is parseInt(id)
                   return sub_object
               
             # Object with specified id couldn't be found.
@@ -371,7 +371,7 @@ class Vault
           # Find functionality.
           object[sub_collection].find = (id) =>
             for sub_collection_object in object[sub_collection]
-              if sub_collection_object[@options.id_attribute] is id
+              if sub_collection_object[@options.id_attribute] is parseInt(id)
                 return sub_collection_object
           
           # Add functionality.

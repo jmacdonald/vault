@@ -43,10 +43,23 @@ describe 'Vault', ->
     
     expect(part.name).toEqual("Turbocharger")
   
-  it 'casts string-based ids when finding an object', ->
+  it 'can find top-level objects using a string-based id', ->
     car = cars.find("1")
     
     expect(car.model).toEqual("Shelby Mustang GT500")
+  
+  it 'can find second-level objects using the convenience class and a string-based id', ->
+    part = cars.parts.find("3")
+    dealer = cars.dealers.find("1")
+    
+    expect(part.name).toEqual("Turbocharger")
+    expect(dealer.name).toEqual("Super Car Mart")
+  
+  it 'can find second-level objects using a string-based id', ->
+    car = cars.find("2")
+    part = car.parts.find("3")
+    
+    expect(part.name).toEqual("Turbocharger")
 
   it 'can add objects', ->
     new_car = cars.add

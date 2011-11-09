@@ -61,7 +61,7 @@
               _ref3 = object[sub_collection];
               for (_k = 0, _len3 = _ref3.length; _k < _len3; _k++) {
                 sub_object = _ref3[_k];
-                if (sub_object[this.options.id_attribute] === id) {
+                if (sub_object[this.options.id_attribute] === parseInt(id)) {
                   return sub_object;
                 }
               }
@@ -377,7 +377,7 @@
             _ref2 = object[sub_collection];
             for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
               sub_collection_object = _ref2[_j];
-              if (sub_collection_object[this.options.id_attribute] === id) {
+              if (sub_collection_object[this.options.id_attribute] === parseInt(id)) {
                 return sub_collection_object;
               }
             }
