@@ -35,7 +35,7 @@
         if (this.options.offline) {
           if (this.load()) {
             if (this.dirty_object_count > 0) {
-              this.options.after_load;
+              this.options.after_load();
             } else {
               this.reload(this.options.after_load);
             }

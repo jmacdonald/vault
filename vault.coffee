@@ -42,7 +42,7 @@ class Vault
         if @load()
           if @dirty_object_count > 0
             # Offline data loaded and modifications found; keep existing data.
-            @options.after_load
+            @options.after_load()
           else
             # No modifications in offline data; reload fresh data.
             @reload(@options.after_load)
