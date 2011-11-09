@@ -48,6 +48,11 @@
       part = car.parts.find(3);
       return expect(part.name).toEqual("Turbocharger");
     });
+    it('casts string-based ids when finding an object', function() {
+      var car;
+      car = cars.find("1");
+      return expect(car.model).toEqual("Shelby Mustang GT500");
+    });
     it('can add objects', function() {
       var new_car;
       new_car = cars.add({

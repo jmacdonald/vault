@@ -104,7 +104,7 @@
       _ref = this.objects;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         object = _ref[_i];
-        if (object[this.options.id_attribute] === id) {
+        if (object[this.options.id_attribute] === parseInt(id)) {
           return object;
         }
       }

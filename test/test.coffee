@@ -42,6 +42,11 @@ describe 'Vault', ->
     part = car.parts.find(3)
     
     expect(part.name).toEqual("Turbocharger")
+  
+  it 'casts string-based ids when finding an object', ->
+    car = cars.find("1")
+    
+    expect(car.model).toEqual("Shelby Mustang GT500")
 
   it 'can add objects', ->
     new_car = cars.add

@@ -105,7 +105,7 @@ class Vault
   # Find an object in the collection using its id.
   find: (id) ->
     for object in @objects
-      if object[@options.id_attribute] == id
+      if object[@options.id_attribute] == parseInt(id)
         return object
 
     # Object not found.
