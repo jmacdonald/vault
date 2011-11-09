@@ -83,7 +83,8 @@
         year: 2008
       });
       expect(cars.objects.length).toEqual(4);
-      return expect(cars.dirty_object_count).toEqual(1);
+      expect(cars.dirty_object_count).toEqual(1);
+      return expect(new_car.status).toEqual("new");
     });
     it('can add objects with a specified id', function() {
       var new_car;
@@ -94,7 +95,21 @@
         year: 2009
       });
       expect(cars.objects.length).toEqual(4);
-      return expect(cars.dirty_object_count).toEqual(1);
+      expect(cars.dirty_object_count).toEqual(1);
+      return expect(new_car.status).toEqual("new");
+    });
+    it('adds an id to new objects if an id is specified but empty', function() {
+      var new_car;
+      new_car = cars.add({
+        id: '',
+        make: "Tesla",
+        model: "Roadster",
+        year: 2009
+      });
+      expect(cars.objects.length).toEqual(4);
+      expect(cars.dirty_object_count).toEqual(1);
+      expect(new_car.status).toEqual("new");
+      return expect(new_car.id).not.toEqual("");
     });
     it('can add second-level objects', function() {
       var car, new_part;
@@ -120,6 +135,20 @@
       expect(cars.objects.length).toEqual(3);
       expect(cars.dirty_object_count).toEqual(1);
       return expect(new_part.status).toEqual("new");
+    });
+    it('adds an id to new sub-objects if an id is specified but empty', function() {
+      var car, new_part;
+      car = cars.find(1);
+      new_part = car.parts.add({
+        id: '',
+        make: "ECU",
+        year: 189.99
+      });
+      expect(car.parts.length).toEqual(3);
+      expect(cars.objects.length).toEqual(3);
+      expect(cars.dirty_object_count).toEqual(1);
+      expect(new_part.status).toEqual("new");
+      return expect(new_part.id).not.toEqual("");
     });
     it('is storing objects after adding', function() {
       var new_car;

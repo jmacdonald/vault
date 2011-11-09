@@ -84,7 +84,7 @@ class Vault
       return false
 
     # If the object has no id, generate a temporary one and add it to the object.
-    unless object[@options.id_attribute]?
+    unless object[@options.id_attribute]? and object[@options.id_attribute] isnt ''
       object[@options.id_attribute] = @date.getTime()
 
     # Extend the object with vault-specific variables and functions.
@@ -388,7 +388,7 @@ class Vault
             sub_object.status = "new"
 
             # If the sub-object has no id, generate a temporary one and add it to the sub-object.
-            unless sub_object[@options.id_attribute]?
+            unless sub_object[@options.id_attribute]? and sub_object[@options.id_attribute] isnt ''
               sub_object[@options.id_attribute] = @date.getTime()
             
             # Add a delete method to the sub-object.

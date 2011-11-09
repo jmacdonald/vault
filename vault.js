@@ -90,7 +90,7 @@
         this.errors.push('Cannot add, vault is locked.');
         return false;
       }
-      if (object[this.options.id_attribute] == null) {
+      if (!((object[this.options.id_attribute] != null) && object[this.options.id_attribute] !== '')) {
         object[this.options.id_attribute] = this.date.getTime();
       }
       this.extend(object, "new");
@@ -389,7 +389,7 @@
               return false;
             }
             sub_object.status = "new";
-            if (sub_object[this.options.id_attribute] == null) {
+            if (!((sub_object[this.options.id_attribute] != null) && sub_object[this.options.id_attribute] !== '')) {
               sub_object[this.options.id_attribute] = this.date.getTime();
             }
             sub_object["delete"] = __bind(function() {

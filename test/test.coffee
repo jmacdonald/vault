@@ -78,6 +78,7 @@ describe 'Vault', ->
 
     expect(cars.objects.length).toEqual(4)
     expect(cars.dirty_object_count).toEqual(1)
+    expect(new_car.status).toEqual("new")
 
   it 'can add objects with a specified id', ->
     new_car = cars.add
@@ -88,6 +89,19 @@ describe 'Vault', ->
 
     expect(cars.objects.length).toEqual(4)
     expect(cars.dirty_object_count).toEqual(1)
+    expect(new_car.status).toEqual("new")
+  
+  it 'adds an id to new objects if an id is specified but empty', ->
+    new_car = cars.add
+      id: '',
+      make: "Tesla",
+      model: "Roadster",
+      year: 2009
+
+    expect(cars.objects.length).toEqual(4)
+    expect(cars.dirty_object_count).toEqual(1)
+    expect(new_car.status).toEqual("new")
+    expect(new_car.id).not.toEqual("")
 
   it 'can add second-level objects', ->
     car = cars.find(2)
@@ -111,6 +125,19 @@ describe 'Vault', ->
     expect(cars.objects.length).toEqual(3)
     expect(cars.dirty_object_count).toEqual(1)
     expect(new_part.status).toEqual("new")
+  
+  it 'adds an id to new sub-objects if an id is specified but empty', ->
+    car = cars.find(1)
+    new_part = car.parts.add
+      id: '',
+      make: "ECU",
+      year: 189.99
+
+    expect(car.parts.length).toEqual(3)
+    expect(cars.objects.length).toEqual(3)
+    expect(cars.dirty_object_count).toEqual(1)
+    expect(new_part.status).toEqual("new")
+    expect(new_part.id).not.toEqual("")
 
   it 'is storing objects after adding', ->
     new_car = cars.add
