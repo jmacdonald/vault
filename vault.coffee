@@ -42,7 +42,10 @@ class Vault
         if @load()
           if @dirty_object_count > 0
             # Offline data loaded and modifications found; keep existing data.
-            @options.after_load()
+            # However, detach the callback to after_load so that the call to
+            # Vault's constructor can complete/return and any post-load code
+            # can use the instantiated vault object as required.
+            window.setTimeout @options.after_load, 100
           else
             # No modifications in offline data; reload fresh data.
             @reload(@options.after_load)
