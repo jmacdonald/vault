@@ -108,7 +108,7 @@ class Vault
       if object[@options.id_attribute] == parseInt(id)
         return object
 
-    # Object not found.
+    # Object with specified id couldn't be found.
     return false
 
   # Update an existing item in the collection.
@@ -373,6 +373,9 @@ class Vault
             for sub_collection_object in object[sub_collection]
               if sub_collection_object[@options.id_attribute] is parseInt(id)
                 return sub_collection_object
+              
+            # Object with specified id couldn't be found.
+            return false
           
           # Add functionality.
           object[sub_collection].add = (sub_object) =>

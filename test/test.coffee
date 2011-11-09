@@ -60,6 +60,15 @@ describe 'Vault', ->
     part = car.parts.find("3")
     
     expect(part.name).toEqual("Turbocharger")
+  
+  it 'always returns false when trying to find a non-existent object', ->
+    car = cars.find(99)
+    part = cars.parts.find(99)
+    dealer = cars.find(1).dealers.find(99)
+
+    expect(car).toEqual(false)
+    expect(part).toEqual(false)
+    expect(dealer).toEqual(false)
 
   it 'can add objects', ->
     new_car = cars.add

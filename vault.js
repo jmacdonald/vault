@@ -381,6 +381,7 @@
                 return sub_collection_object;
               }
             }
+            return false;
           }, this);
           object[sub_collection].add = __bind(function(sub_object) {
             if (this.locked) {

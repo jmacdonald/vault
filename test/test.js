@@ -66,6 +66,15 @@
       part = car.parts.find("3");
       return expect(part.name).toEqual("Turbocharger");
     });
+    it('always returns false when trying to find a non-existent object', function() {
+      var car, dealer, part;
+      car = cars.find(99);
+      part = cars.parts.find(99);
+      dealer = cars.find(1).dealers.find(99);
+      expect(car).toEqual(false);
+      expect(part).toEqual(false);
+      return expect(dealer).toEqual(false);
+    });
     it('can add objects', function() {
       var new_car;
       new_car = cars.add({
