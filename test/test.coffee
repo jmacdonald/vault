@@ -683,3 +683,15 @@ describe 'Vault', ->
     expect(part.delete).toBeDefined()
     expect(dealer.update).toBeDefined()
     expect(dealer.delete).toBeDefined()
+  
+  it "doesn't bother storing an empty collection", ->
+    # Intialize an empty vault.
+    test = new Vault 'test',
+      offline: true
+    waitsFor ->
+      not test.locked
+    
+    # Ensure that nothing of any value is stored.
+    expect(localStorage.test?).toBeFalsy()
+    test.store()
+    expect(localStorage.test?).toBeFalsy()

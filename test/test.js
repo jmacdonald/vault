@@ -719,7 +719,7 @@
       expect(cars.find(1).parts.add).toBeDefined();
       return expect(cars.find(1).parts["delete"]).toBeDefined();
     });
-    return it('is extending stored sub-objects after a reload', function() {
+    it('is extending stored sub-objects after a reload', function() {
       var dealer, part;
       cars.find(1).update();
       cars.store();
@@ -736,6 +736,18 @@
       expect(part["delete"]).toBeDefined();
       expect(dealer.update).toBeDefined();
       return expect(dealer["delete"]).toBeDefined();
+    });
+    return it("doesn't bother storing an empty collection", function() {
+      var test;
+      test = new Vault('test', {
+        offline: true
+      });
+      waitsFor(function() {
+        return !test.locked;
+      });
+      expect(localStorage.test != null).toBeFalsy();
+      test.store();
+      return expect(localStorage.test != null).toBeFalsy();
     });
   });
 }).call(this);
