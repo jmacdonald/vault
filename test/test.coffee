@@ -5,6 +5,7 @@ describe 'Vault', ->
   # Setup a new, fresh Vault for every test.
   cars = null
   beforeEach ->
+    localStorage.clear()
     cars = new Vault 'cars', urls,
       offline: true
       sub_collections: ['parts', 'dealers']
@@ -631,3 +632,54 @@ describe 'Vault', ->
     # Prevent other tests from running until this is complete.
     waitsFor ->
       not cars.locked
+  
+  it 'is extending stored objects after a reload', ->
+    # Save a dirty collection to the offline store.
+    cars.find(1).update()
+    cars.store()
+
+    # Force the collection to be reloaded from the offline store.
+    cars = new Vault 'cars', urls,
+      offline: true
+      sub_collections: ['parts', 'dealers']
+    waitsFor ->
+      not cars.locked
+
+    expect(cars.find(1).update).toBeDefined()
+    expect(cars.find(1).delete).toBeDefined()
+  
+  it 'is extending stored sub-collections after a reload', ->
+    # Save a dirty collection to the offline store.
+    cars.find(1).update()
+    cars.store()
+    
+    # Force the collection to be reloaded from the offline store.
+    cars = new Vault 'cars', urls,
+      offline: true
+      sub_collections: ['parts', 'dealers']
+    waitsFor ->
+      not cars.locked
+
+    expect(cars.find(1).parts.find).toBeDefined()
+    expect(cars.find(1).parts.add).toBeDefined()
+    expect(cars.find(1).parts.delete).toBeDefined()
+  
+  it 'is extending stored sub-objects after a reload', ->
+    # Save a dirty collection to the offline store.
+    cars.find(1).update()
+    cars.store()
+
+    # Force the collection to be reloaded from the offline store.
+    cars = new Vault 'cars', urls,
+      offline: true
+      sub_collections: ['parts', 'dealers']
+    waitsFor ->
+      not cars.locked
+
+    part = cars.parts.find(3)
+    dealer = cars.dealers.find(1)
+
+    expect(part.update).toBeDefined()
+    expect(part.delete).toBeDefined()
+    expect(dealer.update).toBeDefined()
+    expect(dealer.delete).toBeDefined()

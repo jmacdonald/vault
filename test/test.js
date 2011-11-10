@@ -7,6 +7,7 @@
     var cars;
     cars = null;
     beforeEach(function() {
+      localStorage.clear();
       cars = new Vault('cars', urls, {
         offline: true,
         sub_collections: ['parts', 'dealers']
@@ -675,7 +676,7 @@
         return !cars.locked;
       });
     });
-    return it('is refreshing stored objects after a reload', function() {
+    it('is refreshing stored objects after a reload', function() {
       var new_car;
       new_car = cars.add({
         make: "Dodge",
@@ -690,6 +691,51 @@
       return waitsFor(function() {
         return !cars.locked;
       });
+    });
+    it('is extending stored objects after a reload', function() {
+      cars.find(1).update();
+      cars.store();
+      cars = new Vault('cars', urls, {
+        offline: true,
+        sub_collections: ['parts', 'dealers']
+      });
+      waitsFor(function() {
+        return !cars.locked;
+      });
+      expect(cars.find(1).update).toBeDefined();
+      return expect(cars.find(1)["delete"]).toBeDefined();
+    });
+    it('is extending stored sub-collections after a reload', function() {
+      cars.find(1).update();
+      cars.store();
+      cars = new Vault('cars', urls, {
+        offline: true,
+        sub_collections: ['parts', 'dealers']
+      });
+      waitsFor(function() {
+        return !cars.locked;
+      });
+      expect(cars.find(1).parts.find).toBeDefined();
+      expect(cars.find(1).parts.add).toBeDefined();
+      return expect(cars.find(1).parts["delete"]).toBeDefined();
+    });
+    return it('is extending stored sub-objects after a reload', function() {
+      var dealer, part;
+      cars.find(1).update();
+      cars.store();
+      cars = new Vault('cars', urls, {
+        offline: true,
+        sub_collections: ['parts', 'dealers']
+      });
+      waitsFor(function() {
+        return !cars.locked;
+      });
+      part = cars.parts.find(3);
+      dealer = cars.dealers.find(1);
+      expect(part.update).toBeDefined();
+      expect(part["delete"]).toBeDefined();
+      expect(dealer.update).toBeDefined();
+      return expect(dealer["delete"]).toBeDefined();
     });
   });
 }).call(this);
