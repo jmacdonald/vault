@@ -183,8 +183,8 @@ class Vault
     # Object not found.
     return false
 
-  # Write local changes back to the server, using per-object requests.
-  save: (after_save = ->) ->
+  # Write an object back to the server.
+  save: (id, after_save = ->) ->
     # Don't bother if the vault is locked, we're offline or there's nothing to sync.
     if @locked
       @errors.push 'Cannot save, vault is locked.'
@@ -199,83 +199,70 @@ class Vault
     # Lock the vault until the save is complete.
     @locked = true
 
-    # Clear the save error count as we're starting a new save operation.
-    @save_error_count = 0
+    # Find the object using the specified id.
+    object = @find(id)
 
-    # Sync the in-memory data store to the server.
-    sync_error = false
-    for object in @objects
-      do (object) =>
-        switch object.status
-          when "deleted"
-            $.ajax
-              type: 'DELETE'
-              url: @urls.delete
-              data: @strip object
-              fixture: (settings) ->
-                return true
-              success: (data) =>
-                # Forcibly remove the deleted object from the collection.
-                for vault_object, index in @objects
-                  if vault_object.id == object.id
-                    @objects.splice(index, 1)
-                    @dirty_object_count--
-              error: =>
-                @errors.push 'Failed to delete.'
-                @save_error_count++
-              complete: =>
-                # Check to see if we're done.
-                if @dirty_object_count - @save_error_count is 0
-                  # Store the collection, unlock the vault, and execute the callback method.
-                  @store
-                  @locked = false
-                  after_save()
-              dataType: 'json'
-          when "new"
-            $.ajax
-              type: 'POST'
-              url: @urls.create
-              data: @strip object
-              fixture: (settings) =>
-                settings.data.id = @date.getTime()
+    switch object.status
+      when "deleted"
+        $.ajax
+          type: 'DELETE'
+          url: @urls.delete
+          data: @strip object
+          fixture: (settings) ->
+            return true
+          success: (data) =>
+            # Forcibly remove the deleted object from the collection.
+            for vault_object, index in @objects
+              if vault_object.id == object.id
+                @objects.splice(index, 1)
+                @dirty_object_count--
+          error: =>
+            @errors.push 'Failed to delete.'
+          complete: =>
+            # Store the collection, unlock the vault, and execute the callback method.
+            @store
+            @locked = false
+            after_save()
+          dataType: 'json'
+      when "new"
+        $.ajax
+          type: 'POST'
+          url: @urls.create
+          data: @strip object
+          fixture: (settings) =>
+            settings.data.id = @date.getTime()
 
-                return settings.data
-              success: (data) =>
-                # Replace the existing object with the new one from the server and extend it.
-                object = @extend data # This will also set its status to clean.
-                @dirty_object_count--
-              error: =>
-                @errors.push 'Failed to create.'
-                @save_error_count++
-              complete: =>
-                # Check to see if we're done.
-                if @dirty_object_count - @save_error_count is 0
-                  # Store the collection, unlock the vault, and execute the callback method.
-                  @store
-                  @locked = false
-                  after_save()
-              dataType: 'json'
-          when "dirty"
-            $.ajax
-              type: 'POST'
-              url: @urls.update
-              data: @strip object
-              fixture: (settings) ->
-                return true
-              success: (data) =>
-                object.status = "clean"
-                @dirty_object_count--
-              error: =>
-                @errors.push 'Failed to update.'
-                @save_error_count++
-              complete: =>
-                # Check to see if we're done.
-                if @dirty_object_count - @save_error_count is 0
-                  # Store the collection, unlock the vault, and execute the callback method.
-                  @store
-                  @locked = false
-                  after_save()
-              dataType: 'json'
+            return settings.data
+          success: (data) =>
+            # Replace the existing object with the new one from the server and extend it.
+            object = @extend data # This will also set its status to clean.
+            @dirty_object_count--
+          error: =>
+            @errors.push 'Failed to create.'
+          complete: =>
+            # Store the collection, unlock the vault, and execute the callback method.
+            @store
+            @locked = false
+            after_save()
+          dataType: 'json'
+      when "dirty"
+        $.ajax
+          type: 'POST'
+          url: @urls.update
+          data: @strip object
+          fixture: (settings) ->
+            return true
+          success: (data) =>
+            object.status = "clean"
+            @dirty_object_count--
+          error: =>
+            @errors.push 'Failed to update.'
+          complete: =>
+            # Store the collection, unlock the vault, and execute the callback method.
+            @store
+            @locked = false
+            after_save()
+          dataType: 'json'
   
   # Used to wipe out the in-memory object list with a fresh one from the server.
   reload: (after_load = ->) ->
@@ -370,6 +357,8 @@ class Vault
       @update(attributes, object.id)
     object.delete = =>
       @delete(object.id)
+    object.save = (after_save) =>
+      @save(object.id, after_save)
     
     # Iterate through all of the sub-collections, and if present
     # extend them with some basic functionality.
@@ -495,6 +484,7 @@ class Vault
     delete object_clone.status
     delete object_clone.update
     delete object_clone.delete
+    delete object_clone.save
     
     # Iterate through all of the sub-collections, and if present
     # strip them of their extended functionality.

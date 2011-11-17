@@ -628,7 +628,7 @@
       expect(cars.objects.length).toEqual(3);
       return expect(cars.dirty_object_count).toEqual(1);
     });
-    it('can save properly', function() {
+    it('can save individual objects properly', function() {
       var car, new_car;
       new_car = cars.add({
         make: "Dodge",
@@ -642,9 +642,9 @@
       car.update();
       expect(cars.objects.length).toEqual(4);
       expect(cars.dirty_object_count).toEqual(2);
-      return cars.save(function() {
+      return car.save(function() {
         expect(cars.objects.length).toEqual(4);
-        return expect(cars.dirty_object_count).toEqual(0);
+        return expect(cars.dirty_object_count).toEqual(1);
       });
     });
     it('is storing objects after save', function() {

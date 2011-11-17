@@ -172,8 +172,8 @@
       }
       return false;
     };
-    Vault.prototype.save = function(after_save) {
-      var object, sync_error, _i, _len, _ref, _results;
+    Vault.prototype.save = function(id, after_save) {
+      var object;
       if (after_save == null) {
         after_save = function() {};
       }
@@ -188,100 +188,82 @@
         return after_save();
       }
       this.locked = true;
-      this.save_error_count = 0;
-      sync_error = false;
-      _ref = this.objects;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        object = _ref[_i];
-        _results.push(__bind(function(object) {
-          switch (object.status) {
-            case "deleted":
-              return $.ajax({
-                type: 'DELETE',
-                url: this.urls["delete"],
-                data: this.strip(object),
-                fixture: function(settings) {
-                  return true;
-                },
-                success: __bind(function(data) {
-                  var index, vault_object, _len2, _ref2, _results2;
-                  _ref2 = this.objects;
-                  _results2 = [];
-                  for (index = 0, _len2 = _ref2.length; index < _len2; index++) {
-                    vault_object = _ref2[index];
-                    _results2.push(vault_object.id === object.id ? (this.objects.splice(index, 1), this.dirty_object_count--) : void 0);
-                  }
-                  return _results2;
-                }, this),
-                error: __bind(function() {
-                  this.errors.push('Failed to delete.');
-                  return this.save_error_count++;
-                }, this),
-                complete: __bind(function() {
-                  if (this.dirty_object_count - this.save_error_count === 0) {
-                    this.store;
-                    this.locked = false;
-                    return after_save();
-                  }
-                }, this),
-                dataType: 'json'
-              });
-            case "new":
-              return $.ajax({
-                type: 'POST',
-                url: this.urls.create,
-                data: this.strip(object),
-                fixture: __bind(function(settings) {
-                  settings.data.id = this.date.getTime();
-                  return settings.data;
-                }, this),
-                success: __bind(function(data) {
-                  object = this.extend(data);
-                  return this.dirty_object_count--;
-                }, this),
-                error: __bind(function() {
-                  this.errors.push('Failed to create.');
-                  return this.save_error_count++;
-                }, this),
-                complete: __bind(function() {
-                  if (this.dirty_object_count - this.save_error_count === 0) {
-                    this.store;
-                    this.locked = false;
-                    return after_save();
-                  }
-                }, this),
-                dataType: 'json'
-              });
-            case "dirty":
-              return $.ajax({
-                type: 'POST',
-                url: this.urls.update,
-                data: this.strip(object),
-                fixture: function(settings) {
-                  return true;
-                },
-                success: __bind(function(data) {
-                  object.status = "clean";
-                  return this.dirty_object_count--;
-                }, this),
-                error: __bind(function() {
-                  this.errors.push('Failed to update.');
-                  return this.save_error_count++;
-                }, this),
-                complete: __bind(function() {
-                  if (this.dirty_object_count - this.save_error_count === 0) {
-                    this.store;
-                    this.locked = false;
-                    return after_save();
-                  }
-                }, this),
-                dataType: 'json'
-              });
-          }
-        }, this)(object));
+      object = this.find(id);
+      switch (object.status) {
+        case "deleted":
+          return $.ajax({
+            type: 'DELETE',
+            url: this.urls["delete"],
+            data: this.strip(object),
+            fixture: function(settings) {
+              return true;
+            },
+            success: __bind(function(data) {
+              var index, vault_object, _len, _ref, _results;
+              _ref = this.objects;
+              _results = [];
+              for (index = 0, _len = _ref.length; index < _len; index++) {
+                vault_object = _ref[index];
+                _results.push(vault_object.id === object.id ? (this.objects.splice(index, 1), this.dirty_object_count--) : void 0);
+              }
+              return _results;
+            }, this),
+            error: __bind(function() {
+              return this.errors.push('Failed to delete.');
+            }, this),
+            complete: __bind(function() {
+              this.store;
+              this.locked = false;
+              return after_save();
+            }, this),
+            dataType: 'json'
+          });
+        case "new":
+          return $.ajax({
+            type: 'POST',
+            url: this.urls.create,
+            data: this.strip(object),
+            fixture: __bind(function(settings) {
+              settings.data.id = this.date.getTime();
+              return settings.data;
+            }, this),
+            success: __bind(function(data) {
+              object = this.extend(data);
+              return this.dirty_object_count--;
+            }, this),
+            error: __bind(function() {
+              return this.errors.push('Failed to create.');
+            }, this),
+            complete: __bind(function() {
+              this.store;
+              this.locked = false;
+              return after_save();
+            }, this),
+            dataType: 'json'
+          });
+        case "dirty":
+          return $.ajax({
+            type: 'POST',
+            url: this.urls.update,
+            data: this.strip(object),
+            fixture: function(settings) {
+              return true;
+            },
+            success: __bind(function(data) {
+              object.status = "clean";
+              return this.dirty_object_count--;
+            }, this),
+            error: __bind(function() {
+              return this.errors.push('Failed to update.');
+            }, this),
+            complete: __bind(function() {
+              this.store;
+              this.locked = false;
+              return after_save();
+            }, this),
+            dataType: 'json'
+          });
       }
-      return _results;
     };
     Vault.prototype.reload = function(after_load) {
       if (after_load == null) {
@@ -372,6 +354,9 @@
       }, this);
       object["delete"] = __bind(function() {
         return this["delete"](object.id);
+      }, this);
+      object.save = __bind(function(after_save) {
+        return this.save(object.id, after_save);
       }, this);
       _ref = this.options.sub_collections;
       _fn = __bind(function(sub_collection) {
@@ -493,6 +478,7 @@
       delete object_clone.status;
       delete object_clone.update;
       delete object_clone["delete"];
+      delete object_clone.save;
       _ref = this.options.sub_collections;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         sub_collection = _ref[_i];

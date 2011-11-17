@@ -572,7 +572,7 @@ describe 'Vault', ->
     expect(cars.objects.length).toEqual(3)
     expect(cars.dirty_object_count).toEqual(1)
 
-  it 'can save properly', ->
+  it 'can save individual objects properly', ->
     new_car = cars.add
       make: "Dodge",
       model: "Viper SRT-10",
@@ -587,9 +587,9 @@ describe 'Vault', ->
     expect(cars.objects.length).toEqual(4)
     expect(cars.dirty_object_count).toEqual(2)
     
-    cars.save ->
+    car.save ->
       expect(cars.objects.length).toEqual(4)
-      expect(cars.dirty_object_count).toEqual(0)
+      expect(cars.dirty_object_count).toEqual(1)
 
   it 'is storing objects after save', ->
     new_car = cars.add
