@@ -194,7 +194,7 @@
           return $.ajax({
             type: 'DELETE',
             url: this.urls["delete"],
-            data: this.strip(object),
+            data: JSON.stringify(this.strip(object)),
             fixture: function(settings) {
               return true;
             },
@@ -222,7 +222,7 @@
           return $.ajax({
             type: 'POST',
             url: this.urls.create,
-            data: this.strip(object),
+            data: JSON.stringify(this.strip(object)),
             fixture: __bind(function(settings) {
               settings.data.id = this.date.getTime();
               return settings.data;
@@ -245,7 +245,7 @@
           return $.ajax({
             type: 'POST',
             url: this.urls.update,
-            data: this.strip(object),
+            data: JSON.stringify(this.strip(object)),
             fixture: function(settings) {
               return true;
             },
