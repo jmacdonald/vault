@@ -4,6 +4,8 @@
   Vault = (function() {
     function Vault(name, urls, options) {
       var object, option, sub_collection, value, _fn, _i, _j, _len, _len2, _ref, _ref2;
+      this.name = name;
+      this.urls = urls;
       if (options == null) {
         options = {};
       }
@@ -13,8 +15,6 @@
       this.save_error_count = 0;
       this.locked = false;
       this.date = new Date;
-      this.name = name;
-      this.urls = urls;
       this.options = {
         autoload: true,
         after_load: function() {},

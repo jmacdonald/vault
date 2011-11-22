@@ -1,5 +1,5 @@
 class Vault
-  constructor: (name, urls, options = {}) ->
+  constructor: (@name, @urls, options = {}) ->
     # Setup some internal variables.
     @objects = []
     @dirty_object_count = 0
@@ -12,10 +12,6 @@ class Vault
     # Create a date object which will be used to
     # generate unique IDs for new records.
     @date = new Date
-
-    # Import required parameters for the data store.
-    @name = name
-    @urls = urls
 
     # Declare default options.
     @options =
