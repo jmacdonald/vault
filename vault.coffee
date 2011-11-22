@@ -198,12 +198,16 @@ class Vault
     # Find the object using the specified id.
     object = @find(id)
 
+    # Package up the object to be sent to the server.
+    packaged_object = {}
+    packaged_object[@name] = JSON.stringify @strip object
+
     switch object.status
       when "deleted"
         $.ajax
           type: 'DELETE'
           url: @urls.delete
-          data: JSON.stringify @strip object
+          data: packaged_object
           fixture: (settings) ->
             return true
           success: (data) =>
@@ -224,7 +228,7 @@ class Vault
         $.ajax
           type: 'POST'
           url: @urls.create
-          data: JSON.stringify @strip object
+          data: packaged_object
           fixture: (settings) =>
             settings.data.id = @date.getTime()
 
@@ -245,7 +249,7 @@ class Vault
         $.ajax
           type: 'POST'
           url: @urls.update
-          data: JSON.stringify @strip object
+          data: packaged_object
           fixture: (settings) ->
             return true
           success: (data) =>

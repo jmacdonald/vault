@@ -173,7 +173,7 @@
       return false;
     };
     Vault.prototype.save = function(id, after_save) {
-      var object;
+      var object, packaged_object;
       if (after_save == null) {
         after_save = function() {};
       }
@@ -189,12 +189,14 @@
       }
       this.locked = true;
       object = this.find(id);
+      packaged_object = {};
+      packaged_object[this.name] = JSON.stringify(this.strip(object));
       switch (object.status) {
         case "deleted":
           return $.ajax({
             type: 'DELETE',
             url: this.urls["delete"],
-            data: JSON.stringify(this.strip(object)),
+            data: packaged_object,
             fixture: function(settings) {
               return true;
             },
@@ -222,7 +224,7 @@
           return $.ajax({
             type: 'POST',
             url: this.urls.create,
-            data: JSON.stringify(this.strip(object)),
+            data: packaged_object,
             fixture: __bind(function(settings) {
               settings.data.id = this.date.getTime();
               return settings.data;
@@ -245,7 +247,7 @@
           return $.ajax({
             type: 'POST',
             url: this.urls.update,
-            data: JSON.stringify(this.strip(object)),
+            data: packaged_object,
             fixture: function(settings) {
               return true;
             },
