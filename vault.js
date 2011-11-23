@@ -136,7 +136,7 @@
       if (attributes != null) {
         for (attribute in attributes) {
           value = attributes[attribute];
-          if ((object[attribute] != null) && attribute !== this.options['id_attribute']) {
+          if (object[attribute] != null) {
             object[attribute] = value;
           }
         }
@@ -470,7 +470,7 @@
             if (attributes != null) {
               for (attribute in attributes) {
                 value = attributes[attribute];
-                if ((sub_object[attribute] != null) && attribute !== this.options['id_attribute']) {
+                if (sub_object[attribute] != null) {
                   sub_object[attribute] = value;
                 }
               }

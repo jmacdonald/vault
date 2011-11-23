@@ -336,7 +336,24 @@
       expect(cars.objects.length).toEqual(3);
       return expect(cars.dirty_object_count).toEqual(1);
     });
-    it('does not accept updates to id attributes on objects', function() {
+    it('accepts updates to id attributes on objects using vault methods', function() {
+      cars.update({
+        id: 213,
+        make: "Toyota",
+        model: "Supra",
+        year: 2002,
+        trim: "GTS"
+      }, 1);
+      expect(cars.find(213).id).toEqual(213);
+      expect(cars.find(213).make).toEqual("Toyota");
+      expect(cars.find(213).model).toEqual("Supra");
+      expect(cars.find(213).year).toEqual(2002);
+      expect(cars.find(213).trim).toBeUndefined();
+      expect(cars.find(213).status).toEqual('dirty');
+      expect(cars.objects.length).toEqual(3);
+      return expect(cars.dirty_object_count).toEqual(1);
+    });
+    it('accepts updates to id attributes on objects using instance methods', function() {
       var car;
       car = cars.find(1);
       car.update({
@@ -346,12 +363,12 @@
         year: 2002,
         trim: "GTS"
       });
-      expect(cars.find(1).id).toEqual(1);
-      expect(cars.find(1).make).toEqual("Toyota");
-      expect(cars.find(1).model).toEqual("Supra");
-      expect(cars.find(1).year).toEqual(2002);
-      expect(cars.find(1).trim).toBeUndefined();
-      expect(cars.find(1).status).toEqual('dirty');
+      expect(cars.find(213).id).toEqual(213);
+      expect(cars.find(213).make).toEqual("Toyota");
+      expect(cars.find(213).model).toEqual("Supra");
+      expect(cars.find(213).year).toEqual(2002);
+      expect(cars.find(213).trim).toBeUndefined();
+      expect(cars.find(213).status).toEqual('dirty');
       expect(cars.objects.length).toEqual(3);
       return expect(cars.dirty_object_count).toEqual(1);
     });
@@ -406,19 +423,36 @@
       expect(car.parts.length).toEqual(2);
       return expect(cars.dirty_object_count).toEqual(1);
     });
-    it('does not accept updates to id attributes on sub-objects', function() {
+    it('accepts updates to id attributes on sub-objects using sub-collection methods', function() {
+      var car;
+      car = cars.find(1);
+      car.parts.update({
+        id: 215,
+        name: "Exhaust Manifold",
+        price: 249.99
+      }, 1);
+      expect(car.parts.find(215).id).toEqual(215);
+      expect(car.parts.find(215).name).toEqual("Exhaust Manifold");
+      expect(car.parts.find(215).price).toEqual(249.99);
+      expect(car.parts.find(215).condition).toBeUndefined();
+      expect(cars.find(1).status).toEqual('dirty');
+      expect(cars.objects.length).toEqual(3);
+      expect(car.parts.length).toEqual(2);
+      return expect(cars.dirty_object_count).toEqual(1);
+    });
+    it('accepts updates to id attributes on sub-objects using instance methods', function() {
       var car, part;
       car = cars.find(1);
       part = car.parts.find(1);
       part.update({
-        id: 213,
+        id: 215,
         name: "Exhaust Manifold",
         price: 249.99
       });
-      expect(car.parts.find(1).id).toEqual(1);
-      expect(car.parts.find(1).name).toEqual("Exhaust Manifold");
-      expect(car.parts.find(1).price).toEqual(249.99);
-      expect(car.parts.find(1).condition).toBeUndefined();
+      expect(car.parts.find(215).id).toEqual(215);
+      expect(car.parts.find(215).name).toEqual("Exhaust Manifold");
+      expect(car.parts.find(215).price).toEqual(249.99);
+      expect(car.parts.find(215).condition).toBeUndefined();
       expect(cars.find(1).status).toEqual('dirty');
       expect(cars.objects.length).toEqual(3);
       expect(car.parts.length).toEqual(2);

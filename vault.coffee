@@ -139,7 +139,7 @@ class Vault
     # Merge in the updated attributes, if they're specified and defined on the object.
     if attributes?
       for attribute, value of attributes
-        if object[attribute]? and attribute isnt @options['id_attribute']
+        if object[attribute]?
           object[attribute] = value
 
     # Store the collection.
@@ -487,7 +487,7 @@ class Vault
             # Merge in the updated attributes, if they're specified and defined on the sub-object.
             if attributes?
               for attribute, value of attributes
-                if sub_object[attribute]? and attribute isnt @options['id_attribute']
+                if sub_object[attribute]?
                   sub_object[attribute] = value
             
             # Store the collection.
