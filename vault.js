@@ -248,11 +248,17 @@
             url: this.urls.create,
             data: packaged_object,
             fixture: __bind(function(settings) {
-              settings.data.id = this.date.getTime();
-              return settings.data;
+              return {
+                id: 123,
+                make: "Dodge",
+                model: "Viper SRT-10",
+                year: 2008
+              };
             }, this),
             success: __bind(function(data) {
-              object = this.extend(data);
+              this.locked = false;
+              object.update(data, object.id);
+              object.status = "clean";
               return this.dirty_object_count--;
             }, this),
             error: __bind(function() {

@@ -731,6 +731,27 @@
         return expect(cars.dirty_object_count).toEqual(0);
       });
     });
+    it('is updating object ids after save', function() {
+      var new_car, save_complete, temporary_id;
+      new_car = cars.add({
+        make: "Dodge",
+        model: "Viper SRT-10",
+        year: 2008
+      });
+      temporary_id = new_car.id;
+      expect(cars.locked).toBeFalsy();
+      expect(cars.load).toBeTruthy();
+      save_complete = false;
+      new_car.save(function() {
+        expect(new_car.id).toNotEqual(temporary_id);
+        expect(cars.objects.length).toEqual(4);
+        expect(cars.dirty_object_count).toEqual(0);
+        return save_complete = true;
+      });
+      return waitsFor(function() {
+        return save_complete;
+      });
+    });
     it('can reload objects', function() {
       var new_car;
       new_car = cars.add({

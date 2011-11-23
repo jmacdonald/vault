@@ -257,12 +257,19 @@ class Vault
           url: @urls.create
           data: packaged_object
           fixture: (settings) =>
-            settings.data.id = @date.getTime()
-
-            return settings.data
+            return {
+              id: 123
+              make: "Dodge",
+              model: "Viper SRT-10",
+              year: 2008}
           success: (data) =>
-            # Replace the existing object with the new one from the server and extend it.
-            object = @extend data # This will also set its status to clean.
+            # Unlock the vault prematurely so that we can update it.
+            @locked = false
+
+            # Update the object with the attributes sent from the server.
+            object.update data, object.id
+            
+            object.status = "clean"
             @dirty_object_count--
           error: =>
             @errors.push 'Failed to create.'

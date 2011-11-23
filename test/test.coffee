@@ -675,6 +675,26 @@ describe 'Vault', ->
       expect(cars.objects.length).toEqual(4)
       expect(cars.dirty_object_count).toEqual(0)
 
+  it 'is updating object ids after save', ->
+    new_car = cars.add
+      make: "Dodge",
+      model: "Viper SRT-10",
+      year: 2008
+    temporary_id = new_car.id
+
+    expect(cars.locked).toBeFalsy()
+    expect(cars.load).toBeTruthy()
+    
+    save_complete = false
+    new_car.save ->
+      expect(new_car.id).toNotEqual(temporary_id)
+      expect(cars.objects.length).toEqual(4)
+      expect(cars.dirty_object_count).toEqual(0)
+      save_complete = true
+    
+    waitsFor ->
+      save_complete
+
   it 'can reload objects', ->
     new_car = cars.add
       make: "Dodge",
