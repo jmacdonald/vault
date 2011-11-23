@@ -572,6 +572,24 @@ describe 'Vault', ->
     expect(cars.objects.length).toEqual(3)
     expect(cars.dirty_object_count).toEqual(1)
 
+  it 'can destroy new objects using Vault methods', ->
+    new_car = cars.add
+      id: 12,
+      make: "Tesla",
+      model: "Roadster",
+      year: 2009
+    cars.destroy(12)
+
+    expect(cars.objects.length).toEqual(3)
+    expect(cars.dirty_object_count).toEqual(0)
+
+  it 'can destroy existing objects using Vault methods', ->
+    cars.destroy(3)
+
+    expect(cars.objects.length).toEqual(2)
+    expect(cars.dirty_object_count).toEqual(0)
+    expect(cars.find(3)).toBeFalsy()
+
   it 'can save individual objects properly', ->
     new_car = cars.add
       make: "Dodge",

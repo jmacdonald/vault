@@ -172,6 +172,28 @@
       }
       return false;
     };
+    Vault.prototype.destroy = function(id) {
+      var index, object, _len, _ref;
+      if (this.locked) {
+        this.errors.push('Cannot delete, vault is locked.');
+        return false;
+      }
+      _ref = this.objects;
+      for (index = 0, _len = _ref.length; index < _len; index++) {
+        object = _ref[index];
+        if (object[this.options.id_attribute] === id) {
+          this.objects.splice(index, 1);
+          switch (object.status) {
+            case "new":
+            case "dirty":
+              this.dirty_object_count--;
+          }
+          this.store;
+          return true;
+        }
+      }
+      return false;
+    };
     Vault.prototype.save = function(id, after_save) {
       var object, packaged_object;
       if (after_save == null) {
