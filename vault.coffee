@@ -384,6 +384,8 @@ class Vault
       @update(attributes, object.id)
     object.delete = =>
       @delete(object.id)
+    object.destroy = =>
+      @destroy(object.id)
     object.save = (after_save) =>
       @save(object.id, after_save)
     
@@ -508,9 +510,11 @@ class Vault
     if object_clone.status is "new"
       delete object_clone[@options.id_attribute]
     
+    # Remove vault object methods.
     delete object_clone.status
     delete object_clone.update
     delete object_clone.delete
+    delete object_clone.destroy
     delete object_clone.save
     
     # Iterate through all of the sub-collections, and if present

@@ -379,6 +379,9 @@
       object["delete"] = __bind(function() {
         return this["delete"](object.id);
       }, this);
+      object.destroy = __bind(function() {
+        return this.destroy(object.id);
+      }, this);
       object.save = __bind(function(after_save) {
         return this.save(object.id, after_save);
       }, this);
@@ -502,6 +505,7 @@
       delete object_clone.status;
       delete object_clone.update;
       delete object_clone["delete"];
+      delete object_clone.destroy;
       delete object_clone.save;
       _ref = this.options.sub_collections;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
