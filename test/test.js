@@ -529,7 +529,7 @@
       }
       return _results;
     });
-    it('can remove new objects via instances', function() {
+    it('can delete new objects via instances', function() {
       var new_car;
       new_car = cars.add({
         make: "Dodge",
@@ -540,7 +540,7 @@
       expect(cars.objects.length).toEqual(3);
       return expect(cars.dirty_object_count).toEqual(0);
     });
-    it('can remove new objects via methods', function() {
+    it('can delete new objects via methods', function() {
       var new_car;
       new_car = cars.add({
         id: 12,
@@ -552,7 +552,7 @@
       expect(cars.objects.length).toEqual(3);
       return expect(cars.dirty_object_count).toEqual(0);
     });
-    it('can remove existing objects via instances', function() {
+    it('can delete existing objects via instances', function() {
       var car;
       car = cars.find(1);
       car["delete"]();
@@ -560,13 +560,13 @@
       expect(cars.dirty_object_count).toEqual(1);
       return expect(car.status).toEqual('deleted');
     });
-    it('can remove existing objects via methods', function() {
+    it('can delete existing objects via methods', function() {
       cars["delete"](3);
       expect(cars.objects.length).toEqual(3);
       expect(cars.dirty_object_count).toEqual(1);
       return expect(cars.find(3).status).toEqual('deleted');
     });
-    it('can remove new sub-objects via instances', function() {
+    it('can delete new sub-objects via instances', function() {
       var car, new_part;
       car = cars.find(3);
       new_part = car.parts.add({
@@ -579,7 +579,7 @@
       expect(cars.dirty_object_count).toEqual(1);
       return expect(car.parts.length).toEqual(0);
     });
-    it('can remove new sub-objects via methods', function() {
+    it('can delete new sub-objects via methods', function() {
       var car, new_part;
       car = cars.find(3);
       new_part = car.parts.add({
@@ -592,7 +592,7 @@
       expect(cars.dirty_object_count).toEqual(1);
       return expect(car.parts.length).toEqual(0);
     });
-    it('can remove existing sub-objects via instances', function() {
+    it('can delete existing sub-objects via instances', function() {
       var car, new_part;
       car = cars.find(1);
       new_part = car.parts.find(2);
@@ -602,7 +602,7 @@
       expect(car.parts.length).toEqual(1);
       return expect(car.status).toEqual('dirty');
     });
-    it('can remove existing sub-objects via methods', function() {
+    it('can delete existing sub-objects via methods', function() {
       var car;
       car = cars.find(1);
       car.parts["delete"](2);
