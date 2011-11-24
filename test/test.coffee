@@ -763,6 +763,24 @@ describe 'Vault', ->
     waitsFor ->
       not cars.locked
   
+  it 'is properly loading stored objects', ->
+    # Save a dirty collection to the offline store.
+    cars.find(1).update()
+    new_car = cars.add
+      id: 123
+      make: "Dodge",
+      model: "Viper SRT-10",
+      year: 2008
+    cars.store()
+    cars.load()
+
+    expect(cars.find(1).update).toBeDefined()
+    expect(cars.find(1).delete).toBeDefined()
+    expect(cars.find(1).status).toEqual('dirty')
+    expect(cars.find(123).update).toBeDefined()
+    expect(cars.find(123).delete).toBeDefined()
+    expect(cars.find(123).status).toEqual('new')
+  
   it 'is extending stored objects after a reload', ->
     # Save a dirty collection to the offline store.
     cars.find(1).update()

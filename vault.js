@@ -3,7 +3,7 @@
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
   Vault = (function() {
     function Vault(name, urls, options) {
-      var object, option, sub_collection, value, _fn, _i, _j, _len, _len2, _ref, _ref2;
+      var option, sub_collection, value, _fn, _i, _len, _ref;
       this.name = name;
       this.urls = urls;
       if (options == null) {
@@ -35,11 +35,6 @@
         if (this.options.offline) {
           if (this.load()) {
             if (this.dirty_object_count > 0) {
-              _ref = this.objects;
-              for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-                object = _ref[_i];
-                this.extend(object);
-              }
               window.setTimeout(this.options.after_load, 100);
             } else {
               this.reload(this.options.after_load);
@@ -55,17 +50,17 @@
           this.reload(this.options.after_load);
         }
       }
-      _ref2 = this.options.sub_collections;
+      _ref = this.options.sub_collections;
       _fn = __bind(function(sub_collection) {
         return this[sub_collection] = {
           'find': __bind(function(id) {
-            var object, sub_object, _k, _l, _len3, _len4, _ref3, _ref4;
-            _ref3 = this.objects;
-            for (_k = 0, _len3 = _ref3.length; _k < _len3; _k++) {
-              object = _ref3[_k];
-              _ref4 = object[sub_collection];
-              for (_l = 0, _len4 = _ref4.length; _l < _len4; _l++) {
-                sub_object = _ref4[_l];
+            var object, sub_object, _j, _k, _len2, _len3, _ref2, _ref3;
+            _ref2 = this.objects;
+            for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
+              object = _ref2[_j];
+              _ref3 = object[sub_collection];
+              for (_k = 0, _len3 = _ref3.length; _k < _len3; _k++) {
+                sub_object = _ref3[_k];
                 if (sub_object[this.options.id_attribute].toString() === id.toString()) {
                   return sub_object;
                 }
@@ -75,8 +70,8 @@
           }, this)
         };
       }, this);
-      for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
-        sub_collection = _ref2[_j];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        sub_collection = _ref[_i];
         _fn(sub_collection);
       }
     }
@@ -348,7 +343,7 @@
       }, this));
     };
     Vault.prototype.load = function() {
-      var object, _i, _len, _ref;
+      var object, _i, _j, _len, _len2, _ref, _ref2;
       if (!this.options.offline) {
         return false;
       }
@@ -357,6 +352,11 @@
         _ref = this.objects;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           object = _ref[_i];
+          this.extend(object);
+        }
+        _ref2 = this.objects;
+        for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
+          object = _ref2[_j];
           if (object.status !== "clean") {
             this.dirty_object_count++;
           }
@@ -375,10 +375,11 @@
     };
     Vault.prototype.extend = function(object, status) {
       var sub_collection, _fn, _i, _len, _ref;
-      if (status == null) {
-        status = "clean";
+      if (status != null) {
+        if (status !== 'clean' && status !== 'dirty' && status !== 'new') {
+          throw "Invalid status specified: cannot extend object.";
+        }
       }
-      object.status = status;
       object.update = __bind(function(attributes) {
         return this.update(attributes, object.id);
       }, this);
@@ -391,6 +392,13 @@
       object.save = __bind(function(after_save) {
         return this.save(object.id, after_save);
       }, this);
+      if (status != null) {
+        object.status = status;
+      } else {
+        if (object.status == null) {
+          object.status = "clean";
+        }
+      }
       _ref = this.options.sub_collections;
       _fn = __bind(function(sub_collection) {
         var index, sub_object, _j, _len2, _len3, _ref2, _ref3, _results;
