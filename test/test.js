@@ -825,6 +825,24 @@
       expect(cars.find(123)["delete"]).toBeDefined();
       return expect(cars.find(123).status).toEqual('new');
     });
+    it('is validating status accepted by extend method', function() {
+      var car_data, invalid, valid_clean, valid_dirty, valid_new;
+      try {
+        car_data = {
+          make: "Dodge",
+          model: "Viper SRT-10",
+          year: 2008
+        };
+        valid_clean = cars.extend(car_data, 'clean');
+        valid_dirty = cars.extend(car_data, 'dirty');
+        valid_new = cars.extend(car_data, 'new');
+        invalid = cars.extend(car_data, 'lovejungle');
+      } catch (_e) {}
+      expect(valid_clean).toBeDefined();
+      expect(valid_dirty).toBeDefined();
+      expect(valid_new).toBeDefined();
+      return expect(invalid).toBeUndefined();
+    });
     it('is extending stored objects after a reload', function() {
       cars.find(1).update();
       cars.store();

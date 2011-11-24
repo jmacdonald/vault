@@ -781,6 +781,23 @@ describe 'Vault', ->
     expect(cars.find(123).delete).toBeDefined()
     expect(cars.find(123).status).toEqual('new')
   
+  it 'is validating status accepted by extend method', ->
+    try
+      car_data = {
+        make: "Dodge",
+        model: "Viper SRT-10",
+        year: 2008
+      }
+      valid_clean = cars.extend car_data, 'clean'
+      valid_dirty = cars.extend car_data, 'dirty'
+      valid_new = cars.extend car_data, 'new'
+      invalid = cars.extend car_data, 'lovejungle'
+
+    expect(valid_clean).toBeDefined()
+    expect(valid_dirty).toBeDefined()
+    expect(valid_new).toBeDefined()
+    expect(invalid).toBeUndefined()
+  
   it 'is extending stored objects after a reload', ->
     # Save a dirty collection to the offline store.
     cars.find(1).update()
