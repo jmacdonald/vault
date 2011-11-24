@@ -44,23 +44,61 @@ describe 'Vault', ->
     
     expect(part.name).toEqual("Turbocharger")
   
-  it 'can find top-level objects using a string-based id', ->
+  it 'can find top-level objects using differing id types', ->
+    # Number and string.
     car = cars.find("1")
-    
     expect(car.model).toEqual("Shelby Mustang GT500")
+
+    # String and number.
+    new_car = cars.add
+      id: "123"
+      make: "Dodge",
+      model: "Viper SRT-10",
+      year: 2008
+    
+    expect(cars.find(123).model).toEqual("Viper SRT-10")
+    
+    # String and string.
+    expect(cars.find("123").model).toEqual("Viper SRT-10")
   
-  it 'can find second-level objects using the convenience class and a string-based id', ->
+  it 'can find second-level objects using the convenience class and differing id types', ->
+    # Number and string.
     part = cars.parts.find("3")
     dealer = cars.dealers.find("1")
     
     expect(part.name).toEqual("Turbocharger")
     expect(dealer.name).toEqual("Super Car Mart")
+
+    # String and number.
+    car = cars.find(1)
+    new_part = car.parts.add
+      id: "234"
+      name: "Intercooler",
+      year: 259.99
+    
+    expect(cars.parts.find(234).name).toEqual("Intercooler")
+
+    # String and string.
+    expect(cars.parts.find("234").name).toEqual("Intercooler")
   
-  it 'can find second-level objects using a string-based id', ->
+  it 'can find second-level objects using differing id types', ->
+    # Number and string.
     car = cars.find("2")
     part = car.parts.find("3")
     
     expect(part.name).toEqual("Turbocharger")
+
+    # String and number.
+    car = cars.find(1)
+    new_part = car.parts.add
+      id: "234"
+      name: "Intercooler",
+      year: 259.99
+    
+    expect(car.parts.find(234).name).toEqual("Intercooler")
+
+    # String and string.
+    expect(car.parts.find("234").name).toEqual("Intercooler")
   
   it 'always returns false when trying to find a non-existent object', ->
     car = cars.find(99)

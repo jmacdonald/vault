@@ -49,23 +49,47 @@
       part = car.parts.find(3);
       return expect(part.name).toEqual("Turbocharger");
     });
-    it('can find top-level objects using a string-based id', function() {
-      var car;
+    it('can find top-level objects using differing id types', function() {
+      var car, new_car;
       car = cars.find("1");
-      return expect(car.model).toEqual("Shelby Mustang GT500");
+      expect(car.model).toEqual("Shelby Mustang GT500");
+      new_car = cars.add({
+        id: "123",
+        make: "Dodge",
+        model: "Viper SRT-10",
+        year: 2008
+      });
+      expect(cars.find(123).model).toEqual("Viper SRT-10");
+      return expect(cars.find("123").model).toEqual("Viper SRT-10");
     });
-    it('can find second-level objects using the convenience class and a string-based id', function() {
-      var dealer, part;
+    it('can find second-level objects using the convenience class and differing id types', function() {
+      var car, dealer, new_part, part;
       part = cars.parts.find("3");
       dealer = cars.dealers.find("1");
       expect(part.name).toEqual("Turbocharger");
-      return expect(dealer.name).toEqual("Super Car Mart");
+      expect(dealer.name).toEqual("Super Car Mart");
+      car = cars.find(1);
+      new_part = car.parts.add({
+        id: "234",
+        name: "Intercooler",
+        year: 259.99
+      });
+      expect(cars.parts.find(234).name).toEqual("Intercooler");
+      return expect(cars.parts.find("234").name).toEqual("Intercooler");
     });
-    it('can find second-level objects using a string-based id', function() {
-      var car, part;
+    it('can find second-level objects using differing id types', function() {
+      var car, new_part, part;
       car = cars.find("2");
       part = car.parts.find("3");
-      return expect(part.name).toEqual("Turbocharger");
+      expect(part.name).toEqual("Turbocharger");
+      car = cars.find(1);
+      new_part = car.parts.add({
+        id: "234",
+        name: "Intercooler",
+        year: 259.99
+      });
+      expect(car.parts.find(234).name).toEqual("Intercooler");
+      return expect(car.parts.find("234").name).toEqual("Intercooler");
     });
     it('always returns false when trying to find a non-existent object', function() {
       var car, dealer, part;
