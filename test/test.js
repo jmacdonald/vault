@@ -806,6 +806,16 @@
         return !cars.locked;
       });
     });
+    it('doesnt try reloading in the constructor unless a list url is configured', function() {
+      cars = new Vault('cars', {}, {
+        offline: true,
+        sub_collections: ['parts', 'dealers']
+      });
+      waitsFor(function() {
+        return !cars.locked;
+      });
+      return expect(cars.errors.length).toEqual(0);
+    });
     it('is refreshing stored objects after a reload', function() {
       var new_car;
       new_car = cars.add({

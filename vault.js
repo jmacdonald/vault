@@ -37,17 +37,29 @@
             if (this.dirty_object_count > 0) {
               window.setTimeout(this.options.after_load, 100);
             } else {
-              this.reload(this.options.after_load);
+              if (this.urls.list != null) {
+                this.reload(this.options.after_load);
+              } else {
+                this.options.after_load();
+              }
             }
           } else {
             if (navigator.onLine) {
-              this.reload(this.options.after_load);
+              if (this.urls.list != null) {
+                this.reload(this.options.after_load);
+              } else {
+                this.options.after_load();
+              }
             } else {
               this.errors.push("Offline data failed to load. Could not load live data as browser is offline.");
             }
           }
         } else {
-          this.reload(this.options.after_load);
+          if (this.urls.list != null) {
+            this.reload(this.options.after_load);
+          } else {
+            this.options.after_load();
+          }
         }
       }
       _ref = this.options.sub_collections;

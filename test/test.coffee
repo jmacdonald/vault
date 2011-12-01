@@ -764,6 +764,16 @@ describe 'Vault', ->
     waitsFor ->
       not cars.locked
 
+  it 'doesnt try reloading in the constructor unless a list url is configured', ->
+    # Initialize a vault without any urls.
+    cars = new Vault 'cars', {},
+      offline: true
+      sub_collections: ['parts', 'dealers']
+    waitsFor ->
+      not cars.locked
+
+    expect(cars.errors.length).toEqual(0)
+
   it 'is refreshing stored objects after a reload', ->
     new_car = cars.add
       make: "Dodge",
