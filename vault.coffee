@@ -303,6 +303,9 @@ class Vault
     else if not navigator.onLine
       @errors.push 'Cannot reload, navigator is offline.'
       return after_load()
+    else if not @urls.list?
+      @errors.push 'Cannot reload, list url is not configured.'
+      return after_load()
 
     # Lock the vault until the reload is complete.
     @locked = true

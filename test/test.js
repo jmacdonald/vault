@@ -1,14 +1,12 @@
 (function() {
-  var urls;
-  urls = {
-    list: "test.json"
-  };
   describe('Vault', function() {
     var cars;
     cars = null;
     beforeEach(function() {
       localStorage.clear();
-      cars = new Vault('cars', urls, {
+      cars = new Vault('cars', {
+        list: "test.json"
+      }, {
         offline: true,
         sub_collections: ['parts', 'dealers']
       });
@@ -791,6 +789,23 @@
         return !cars.locked;
       });
     });
+    it('only reloads if a list url is configured', function() {
+      var new_car;
+      delete cars.urls.list;
+      new_car = cars.add({
+        make: "Dodge",
+        model: "Viper SRT-10",
+        year: 2008
+      });
+      cars.reload(function() {
+        expect(cars.objects.length).toEqual(4);
+        expect(cars.dirty_object_count).toEqual(1);
+        return expect(cars.errors[0]).toEqual('Cannot reload, list url is not configured.');
+      });
+      return waitsFor(function() {
+        return !cars.locked;
+      });
+    });
     it('is refreshing stored objects after a reload', function() {
       var new_car;
       new_car = cars.add({
@@ -846,7 +861,9 @@
     it('is extending stored objects after a reload', function() {
       cars.find(1).update();
       cars.store();
-      cars = new Vault('cars', urls, {
+      cars = new Vault('cars', {
+        list: "test.json"
+      }, {
         offline: true,
         sub_collections: ['parts', 'dealers']
       });
@@ -859,7 +876,9 @@
     it('is extending stored sub-collections after a reload', function() {
       cars.find(1).update();
       cars.store();
-      cars = new Vault('cars', urls, {
+      cars = new Vault('cars', {
+        list: "test.json"
+      }, {
         offline: true,
         sub_collections: ['parts', 'dealers']
       });
@@ -874,7 +893,9 @@
       var dealer, part;
       cars.find(1).update();
       cars.store();
-      cars = new Vault('cars', urls, {
+      cars = new Vault('cars', {
+        list: "test.json"
+      }, {
         offline: true,
         sub_collections: ['parts', 'dealers']
       });

@@ -300,6 +300,9 @@
       } else if (!navigator.onLine) {
         this.errors.push('Cannot reload, navigator is offline.');
         return after_load();
+      } else if (!(this.urls.list != null)) {
+        this.errors.push('Cannot reload, list url is not configured.');
+        return after_load();
       }
       this.locked = true;
       return $.ajax({

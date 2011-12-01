@@ -1,12 +1,9 @@
-urls =
-  list: "test.json"
-
 describe 'Vault', ->
   # Setup a new, fresh Vault for every test.
   cars = null
   beforeEach ->
     localStorage.clear()
-    cars = new Vault 'cars', urls,
+    cars = new Vault 'cars', {list: "test.json"},
       offline: true
       sub_collections: ['parts', 'dealers']
     waitsFor ->
@@ -747,6 +744,26 @@ describe 'Vault', ->
     waitsFor ->
       not cars.locked
 
+  it 'only reloads if a list url is configured', ->
+    # Remove the list url.
+    delete cars.urls.list
+
+    # Add a new car.
+    new_car = cars.add
+      make: "Dodge",
+      model: "Viper SRT-10",
+      year: 2008
+    
+    cars.reload ->
+      # Ensure the reload didn't happen.
+      expect(cars.objects.length).toEqual(4)
+      expect(cars.dirty_object_count).toEqual(1)
+      expect(cars.errors[0]).toEqual('Cannot reload, list url is not configured.')
+    
+    # Prevent other tests from running until this is complete.
+    waitsFor ->
+      not cars.locked
+
   it 'is refreshing stored objects after a reload', ->
     new_car = cars.add
       make: "Dodge",
@@ -804,7 +821,7 @@ describe 'Vault', ->
     cars.store()
 
     # Force the collection to be reloaded from the offline store.
-    cars = new Vault 'cars', urls,
+    cars = new Vault 'cars', {list: "test.json"},
       offline: true
       sub_collections: ['parts', 'dealers']
     waitsFor ->
@@ -819,7 +836,7 @@ describe 'Vault', ->
     cars.store()
     
     # Force the collection to be reloaded from the offline store.
-    cars = new Vault 'cars', urls,
+    cars = new Vault 'cars', {list: "test.json"},
       offline: true
       sub_collections: ['parts', 'dealers']
     waitsFor ->
@@ -835,7 +852,7 @@ describe 'Vault', ->
     cars.store()
 
     # Force the collection to be reloaded from the offline store.
-    cars = new Vault 'cars', urls,
+    cars = new Vault 'cars', {list: "test.json"},
       offline: true
       sub_collections: ['parts', 'dealers']
     waitsFor ->
