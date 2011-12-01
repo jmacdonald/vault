@@ -12,10 +12,10 @@ Vault helps alleviate the need for cellular connectivity when writing mobile web
 
 You've got an ajax-based application running on a smartphone and/or tablet. It's a simple CRUD-based app that interacts with the server whenever a change happens. You delete an object, it sends a DELETE request to the server and you reload the list of items. What happens when your smartphone or tablet loses connectivity?
 
- Your application is useless.
+Your application is useless.
 
- If you want your app to work in these situations, you need to save that delete request temporarily and issue it when you're back online. This applies for all of the other CRUD actions, too. That's where Vault comes in; it takes care of all of this for you. Instead of interacting directly with your web services, you interact with a Vault, and tell it do the synchronization when you're ready. Using Vault, you can write mobile applications that run on wifi-only devices, instead of depending on costly and unreliable cellular data plans.
+If you want your app to work in these situations, you need to save that delete request temporarily and issue it when you're back online. This applies for all of the other CRUD actions, too. That's where Vault comes in; it takes care of all of this for you. Instead of interacting directly with your web services, you interact with a Vault, and tell it do the synchronization when you're ready. Using Vault, you can write mobile applications that run on wifi-only devices, instead of depending on costly and unreliable cellular data plans.
 
- h2. Integration with Rails
+h1. Integration with Rails
 
- Vault can be easily integrated into the Rails 3.1 asset pipeline. Check out the [vault-rails](http://rubygems.org/gems/vault-rails) gem on RubyGems, and its [source](https://github.com/cityofgreatersudbury/vault-rails) on GitHub.
+Vault can be easily integrated into the Rails 3.1 asset pipeline. Check out the [vault-rails](http://rubygems.org/gems/vault-rails) gem on RubyGems, and its [source](https://github.com/cityofgreatersudbury/vault-rails) on GitHub.
