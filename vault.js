@@ -39,29 +39,37 @@
         if (this.options.offline) {
           if (this.load()) {
             if (this.dirty_object_count > 0) {
+              this.messages.notices.push("Found and using dirty offline data.");
               window.setTimeout(this.options.after_load, 100);
             } else {
+              this.messages.notices.push("No modifications found in offline data. Reloading...");
               if (this.urls.list != null) {
                 this.reload(this.options.after_load);
               } else {
+                this.messages.notices.push("List url not configured; using offline data instead.");
                 window.setTimeout(this.options.after_load, 100);
               }
             }
           } else {
             if (navigator.onLine) {
+              this.messages.warnings.push("Offline data load failed. Reloading...");
               if (this.urls.list != null) {
                 this.reload(this.options.after_load);
               } else {
+                this.messages.warnings.push("List url not configured; using empty dataset instead.");
                 window.setTimeout(this.options.after_load, 100);
               }
             } else {
+              this.messages.warnings.push("Browser is offline and cannot reload; using empty dataset instead.");
               window.setTimeout(this.options.after_load, 100);
             }
           }
         } else {
+          this.messages.notices.push("Not configured for offline data. Reloading...");
           if (this.urls.list != null) {
             this.reload(this.options.after_load);
           } else {
+            this.messages.notices.push("List url not configured; using empty dataset instead.");
             window.setTimeout(this.options.after_load, 100);
           }
         }

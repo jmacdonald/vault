@@ -41,17 +41,21 @@ class Vault
         if @load()
           if @dirty_object_count > 0
             # Offline data loaded and modifications found; keep existing data.
-            
+            @messages.notices.push "Found and using dirty offline data."
+
             # Detach the callback to after_load so that the call to the
             # vault constructor can complete/return, allowing any post-load code
             # to use the newly instantiated vault object as required.
             window.setTimeout @options.after_load, 100
           else
             # No modifications in offline data; reload fresh data.
+            @messages.notices.push "No modifications found in offline data. Reloading..."
+
             if @urls.list?
               @reload(@options.after_load)
             else
               # Can't reload without a list url; use the offline data we've loaded.
+              @messages.notices.push "List url not configured; using offline data instead."
             
               # Detach the callback to after_load so that the call to the
               # vault constructor can complete/return, allowing any post-load code
@@ -60,10 +64,13 @@ class Vault
         else
           if navigator.onLine
             # Load failed, but we're connected; reload fresh data.
+            @messages.warnings.push "Offline data load failed. Reloading..."
+            
             if @urls.list?
               @reload(@options.after_load)
             else
               # Can't reload without a list url; use an empty dataset.
+              @messages.warnings.push "List url not configured; using empty dataset instead."
             
               # Detach the callback to after_load so that the call to the
               # vault constructor can complete/return, allowing any post-load code
@@ -71,6 +78,7 @@ class Vault
               window.setTimeout @options.after_load, 100
           else
             # Load failed and we're offline; use an empty dataset.
+            @messages.warnings.push "Browser is offline and cannot reload; using empty dataset instead."
             
             # Detach the callback to after_load so that the call to the
             # vault constructor can complete/return, allowing any post-load code
@@ -78,10 +86,13 @@ class Vault
             window.setTimeout @options.after_load, 100
       else
         # Not using offline data; reload fresh data.
+        @messages.notices.push "Not configured for offline data. Reloading..."
+
         if @urls.list?
           @reload(@options.after_load)
         else
           # Can't reload without a list url; use an empty dataset.
+          @messages.notices.push "List url not configured; using empty dataset instead."
             
           # Detach the callback to after_load so that the call to the
           # vault constructor can complete/return, allowing any post-load code
