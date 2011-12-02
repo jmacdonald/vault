@@ -48,8 +48,12 @@ class Vault
             if @urls.list?
               @reload(@options.after_load)
             else
-              # Can't reload without a list url; use the offline data.
-              @options.after_load()
+              # Can't reload without a list url; use the offline data we've loaded.
+            
+              # Detach the callback to after_load so that the call to the
+              # vault constructor can complete/return, allowing any post-load code
+              # to use the newly instantiated vault object as required.
+              window.setTimeout @options.after_load, 100
         else
           if navigator.onLine
             # Load failed, but we're connected; reload fresh data.
@@ -57,7 +61,11 @@ class Vault
               @reload(@options.after_load)
             else
               # Can't reload without a list url; use an empty dataset.
-              @options.after_load()
+            
+              # Detach the callback to after_load so that the call to the
+              # vault constructor can complete/return, allowing any post-load code
+              # to use the newly instantiated vault object as required.
+              window.setTimeout @options.after_load, 100
           else
             # Load failed and we're offline; log an error.
             @errors.push "Offline data failed to load. Could not load live data as browser is offline."
@@ -67,7 +75,11 @@ class Vault
           @reload(@options.after_load)
         else
           # Can't reload without a list url; use an empty dataset.
-          @options.after_load()
+            
+          # Detach the callback to after_load so that the call to the
+          # vault constructor can complete/return, allowing any post-load code
+          # to use the newly instantiated vault object as required.
+          window.setTimeout @options.after_load, 100
     
     # Create convenience attributes for sub-collections.
     for sub_collection in @options.sub_collections

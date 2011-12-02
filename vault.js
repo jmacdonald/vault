@@ -40,7 +40,7 @@
               if (this.urls.list != null) {
                 this.reload(this.options.after_load);
               } else {
-                this.options.after_load();
+                window.setTimeout(this.options.after_load, 100);
               }
             }
           } else {
@@ -48,7 +48,7 @@
               if (this.urls.list != null) {
                 this.reload(this.options.after_load);
               } else {
-                this.options.after_load();
+                window.setTimeout(this.options.after_load, 100);
               }
             } else {
               this.errors.push("Offline data failed to load. Could not load live data as browser is offline.");
@@ -58,7 +58,7 @@
           if (this.urls.list != null) {
             this.reload(this.options.after_load);
           } else {
-            this.options.after_load();
+            window.setTimeout(this.options.after_load, 100);
           }
         }
       }

@@ -919,7 +919,7 @@
       expect(dealer.update).toBeDefined();
       return expect(dealer["delete"]).toBeDefined();
     });
-    return it("doesn't bother storing an empty collection", function() {
+    it("doesn't bother storing an empty collection", function() {
       var test;
       test = new Vault('test', {
         offline: true
@@ -930,6 +930,51 @@
       expect(localStorage.test != null).toBeFalsy();
       test.store();
       return expect(localStorage.test != null).toBeFalsy();
+    });
+    it("always detaches before calling after_load with dirty dataset and no list url", function() {
+      var has_run;
+      has_run = false;
+      localStorage.setItem('cars', '[{"make": "Ford", "model": "Mustang", "status": "dirty"}]');
+      cars = new Vault('cars', {}, {
+        offline: true,
+        after_load: function() {
+          return has_run = true;
+        }
+      });
+      return expect(has_run).toBeFalsy();
+    });
+    it("always detaches before calling after_load with clean dataset and no list url", function() {
+      var has_run;
+      has_run = false;
+      localStorage.setItem('cars', '[{"make": "Ford", "model": "Mustang", "status": "clean"}]');
+      cars = new Vault('cars', {}, {
+        offline: true,
+        after_load: function() {
+          return has_run = true;
+        }
+      });
+      return expect(has_run).toBeFalsy();
+    });
+    it("always detaches before calling after_load with no dataset and no list url", function() {
+      var has_run;
+      has_run = false;
+      cars = new Vault('cars', {}, {
+        offline: true,
+        after_load: function() {
+          return has_run = true;
+        }
+      });
+      return expect(has_run).toBeFalsy();
+    });
+    return it("always detaches before calling after_load with no list url in online mode", function() {
+      var has_run;
+      has_run = false;
+      cars = new Vault('cars', {}, {
+        after_load: function() {
+          return has_run = true;
+        }
+      });
+      return expect(has_run).toBeFalsy();
     });
   });
 }).call(this);

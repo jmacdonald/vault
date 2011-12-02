@@ -887,3 +887,52 @@ describe 'Vault', ->
     expect(localStorage.test?).toBeFalsy()
     test.store()
     expect(localStorage.test?).toBeFalsy()
+  
+  it "always detaches before calling after_load with dirty dataset and no list url", ->
+    has_run = false
+
+    # Add some dirty data to the offline storage.
+    localStorage.setItem 'cars', '[{"make": "Ford", "model": "Mustang", "status": "dirty"}]'
+
+    # Intialize an empty vault.
+    cars = new Vault 'cars', {},
+      offline: true
+      after_load: ->
+        has_run = true
+    
+    expect(has_run).toBeFalsy()
+  
+  it "always detaches before calling after_load with clean dataset and no list url", ->
+    has_run = false
+
+    # Add some dirty data to the offline storage.
+    localStorage.setItem 'cars', '[{"make": "Ford", "model": "Mustang", "status": "clean"}]'
+
+    # Intialize an empty vault.
+    cars = new Vault 'cars', {},
+      offline: true
+      after_load: ->
+        has_run = true
+    
+    expect(has_run).toBeFalsy()
+  
+  it "always detaches before calling after_load with no dataset and no list url", ->
+    has_run = false
+
+    # Intialize an empty vault.
+    cars = new Vault 'cars', {},
+      offline: true
+      after_load: ->
+        has_run = true
+    
+    expect(has_run).toBeFalsy()
+  
+  it "always detaches before calling after_load with no list url in online mode", ->
+    has_run = false
+
+    # Intialize an empty vault.
+    cars = new Vault 'cars', {},
+      after_load: ->
+        has_run = true
+    
+    expect(has_run).toBeFalsy()
