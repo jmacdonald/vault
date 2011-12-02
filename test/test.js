@@ -800,7 +800,7 @@
       cars.reload(function() {
         expect(cars.objects.length).toEqual(4);
         expect(cars.dirty_object_count).toEqual(1);
-        return expect(cars.errors[0]).toEqual('Cannot reload, list url is not configured.');
+        return expect(cars.messages.errors[0]).toEqual('Cannot reload, list url is not configured.');
       });
       return waitsFor(function() {
         return !cars.locked;
@@ -814,7 +814,7 @@
       waitsFor(function() {
         return !cars.locked;
       });
-      return expect(cars.errors.length).toEqual(0);
+      return expect(cars.messages.errors.length).toEqual(0);
     });
     it('is refreshing stored objects after a reload', function() {
       var new_car;

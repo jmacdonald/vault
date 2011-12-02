@@ -11,8 +11,12 @@
       }
       this.objects = [];
       this.dirty_object_count = 0;
-      this.errors = [];
       this.save_error_count = 0;
+      this.messages = {
+        notices: [],
+        warnings: [],
+        errors: []
+      };
       this.locked = false;
       this.date = new Date;
       this.options = {
@@ -99,7 +103,7 @@
     };
     Vault.prototype.add = function(object) {
       if (this.locked) {
-        this.errors.push('Cannot add, vault is locked.');
+        this.messages.errors.push('Cannot add, vault is locked.');
         return false;
       }
       if (!((object[this.options.id_attribute] != null) && object[this.options.id_attribute] !== '')) {
@@ -125,7 +129,7 @@
     Vault.prototype.update = function(attributes, id) {
       var attribute, object, value;
       if (this.locked) {
-        this.errors.push('Cannot update, vault is locked.');
+        this.messages.errors.push('Cannot update, vault is locked.');
         return false;
       }
       if (id == null) {
@@ -133,7 +137,7 @@
       }
       object = this.find(id);
       if (object == null) {
-        this.errors.push('Cannot update, object not found.');
+        this.messages.errors.push('Cannot update, object not found.');
         return false;
       }
       if (object.status === "clean") {
@@ -154,7 +158,7 @@
     Vault.prototype["delete"] = function(id) {
       var index, object, _len, _ref;
       if (this.locked) {
-        this.errors.push('Cannot delete, vault is locked.');
+        this.messages.errors.push('Cannot delete, vault is locked.');
         return false;
       }
       _ref = this.objects;
@@ -182,7 +186,7 @@
     Vault.prototype.destroy = function(id) {
       var index, object, _len, _ref;
       if (this.locked) {
-        this.errors.push('Cannot delete, vault is locked.');
+        this.messages.errors.push('Cannot delete, vault is locked.');
         return false;
       }
       _ref = this.objects;
@@ -207,13 +211,13 @@
         after_save = function() {};
       }
       if (this.locked) {
-        this.errors.push('Cannot save, vault is locked.');
+        this.messages.errors.push('Cannot save, vault is locked.');
         return after_save();
       } else if (!navigator.onLine) {
-        this.errors.push('Cannot save, navigator is offline.');
+        this.messages.errors.push('Cannot save, navigator is offline.');
         return after_save();
       } else if (this.dirty_object_count === 0) {
-        this.errors.push('Nothing to save.');
+        this.messages.errors.push('Nothing to save.');
         return after_save();
       }
       this.locked = true;
@@ -240,7 +244,7 @@
               return _results;
             }, this),
             error: __bind(function() {
-              return this.errors.push('Failed to delete.');
+              return this.messages.errors.push('Failed to delete.');
             }, this),
             complete: __bind(function() {
               this.store;
@@ -269,7 +273,7 @@
               return this.dirty_object_count--;
             }, this),
             error: __bind(function() {
-              return this.errors.push('Failed to create.');
+              return this.messages.errors.push('Failed to create.');
             }, this),
             complete: __bind(function() {
               this.store;
@@ -291,7 +295,7 @@
               return this.dirty_object_count--;
             }, this),
             error: __bind(function() {
-              return this.errors.push('Failed to update.');
+              return this.messages.errors.push('Failed to update.');
             }, this),
             complete: __bind(function() {
               this.store;
@@ -307,13 +311,13 @@
         after_load = function() {};
       }
       if (this.locked) {
-        this.errors.push('Cannot reload, vault is locked.');
+        this.messages.errors.push('Cannot reload, vault is locked.');
         return after_load();
       } else if (!navigator.onLine) {
-        this.errors.push('Cannot reload, navigator is offline.');
+        this.messages.errors.push('Cannot reload, navigator is offline.');
         return after_load();
       } else if (!(this.urls.list != null)) {
-        this.errors.push('Cannot reload, list url is not configured.');
+        this.messages.errors.push('Cannot reload, list url is not configured.');
         return after_load();
       }
       this.locked = true;
@@ -333,7 +337,7 @@
           return after_load();
         }, this),
         error: __bind(function() {
-          this.errors.push('Failed to list.');
+          this.messages.errors.push('Failed to list.');
           return after_load();
         }, this),
         complete: __bind(function() {
@@ -346,11 +350,11 @@
         after_sync = function() {};
       }
       if (!navigator.onLine) {
-        this.errors.push('Cannot synchronize, navigator is offline.');
+        this.messages.errors.push('Cannot synchronize, navigator is offline.');
         return after_sync();
       }
       return this.save(__bind(function() {
-        if (this.errors.length === 0) {
+        if (this.messages.errors.length === 0) {
           return this.reload(after_sync);
         } else {
           return after_sync();
@@ -431,7 +435,7 @@
           }, this);
           object[sub_collection].add = __bind(function(sub_object) {
             if (this.locked) {
-              this.errors.push('Cannot add sub-object, vault is locked.');
+              this.messages.errors.push('Cannot add sub-object, vault is locked.');
               return false;
             }
             sub_object.status = "new";
@@ -455,7 +459,7 @@
           object[sub_collection]["delete"] = __bind(function(id) {
             var index, sub_object, _len2, _ref2;
             if (this.locked) {
-              this.errors.push('Cannot delete sub-object, vault is locked.');
+              this.messages.errors.push('Cannot delete sub-object, vault is locked.');
               return false;
             }
             _ref2 = object[sub_collection];
@@ -481,7 +485,7 @@
           object[sub_collection].update = __bind(function(attributes, id) {
             var attribute, value;
             if (this.locked) {
-              this.errors.push('Cannot update sub-object, vault is locked.');
+              this.messages.errors.push('Cannot update sub-object, vault is locked.');
               return false;
             }
             if (id == null) {
@@ -489,7 +493,7 @@
             }
             sub_object = object[sub_collection].find(id);
             if (sub_object == null) {
-              this.errors.push('Cannot update, sub-object not found.');
+              this.messages.errors.push('Cannot update, sub-object not found.');
               return false;
             }
             if (object.status === "clean") {

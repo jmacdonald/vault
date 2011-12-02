@@ -758,7 +758,7 @@ describe 'Vault', ->
       # Ensure the reload didn't happen.
       expect(cars.objects.length).toEqual(4)
       expect(cars.dirty_object_count).toEqual(1)
-      expect(cars.errors[0]).toEqual('Cannot reload, list url is not configured.')
+      expect(cars.messages.errors[0]).toEqual('Cannot reload, list url is not configured.')
     
     # Prevent other tests from running until this is complete.
     waitsFor ->
@@ -772,7 +772,7 @@ describe 'Vault', ->
     waitsFor ->
       not cars.locked
 
-    expect(cars.errors.length).toEqual(0)
+    expect(cars.messages.errors.length).toEqual(0)
 
   it 'is refreshing stored objects after a reload', ->
     new_car = cars.add

@@ -3,8 +3,11 @@ class Vault
     # Setup some internal variables.
     @objects = []
     @dirty_object_count = 0
-    @errors = []
     @save_error_count = 0
+    @messages =
+      notices: []
+      warnings: []
+      errors: []
 
     # This property is used to temporarily lock the vault during mutation methods.
     @locked = false
@@ -109,7 +112,7 @@ class Vault
   add: (object) ->
     # Don't bother if the vault is locked.
     if @locked
-      @errors.push 'Cannot add, vault is locked.'
+      @messages.errors.push 'Cannot add, vault is locked.'
       return false
 
     # If the object has no id, generate a temporary one and add it to the object.
@@ -144,7 +147,7 @@ class Vault
   update: (attributes, id) ->
     # Don't bother if the vault is locked.
     if @locked
-      @errors.push 'Cannot update, vault is locked.'
+      @messages.errors.push 'Cannot update, vault is locked.'
       return false
             
     # Get the id of the object from the attributes if it's not explicitly defined.
@@ -153,7 +156,7 @@ class Vault
     # Get the object; return if it's undefined.
     object = @find(id)
     unless object?
-      @errors.push 'Cannot update, object not found.'
+      @messages.errors.push 'Cannot update, object not found.'
       return false
 
     # Flag it as dirty.
@@ -178,7 +181,7 @@ class Vault
   delete: (id) ->
     # Don't bother if the vault is locked.
     if @locked
-      @errors.push 'Cannot delete, vault is locked.'
+      @messages.errors.push 'Cannot delete, vault is locked.'
       return false
 
     for object, index in @objects
@@ -208,7 +211,7 @@ class Vault
   destroy: (id) ->
     # Don't bother if the vault is locked.
     if @locked
-      @errors.push 'Cannot delete, vault is locked.'
+      @messages.errors.push 'Cannot delete, vault is locked.'
       return false
 
     for object, index in @objects
@@ -235,13 +238,13 @@ class Vault
   save: (id, after_save = ->) ->
     # Don't bother if the vault is locked, we're offline or there's nothing to sync.
     if @locked
-      @errors.push 'Cannot save, vault is locked.'
+      @messages.errors.push 'Cannot save, vault is locked.'
       return after_save()
     else if not navigator.onLine
-      @errors.push 'Cannot save, navigator is offline.'
+      @messages.errors.push 'Cannot save, navigator is offline.'
       return after_save()
     else if @dirty_object_count is 0
-      @errors.push 'Nothing to save.'
+      @messages.errors.push 'Nothing to save.'
       return after_save()
 
     # Lock the vault until the save is complete.
@@ -269,7 +272,7 @@ class Vault
                 @objects.splice(index, 1)
                 @dirty_object_count--
           error: =>
-            @errors.push 'Failed to delete.'
+            @messages.errors.push 'Failed to delete.'
           complete: =>
             # Store the collection, unlock the vault, and execute the callback method.
             @store
@@ -297,7 +300,7 @@ class Vault
             object.status = "clean"
             @dirty_object_count--
           error: =>
-            @errors.push 'Failed to create.'
+            @messages.errors.push 'Failed to create.'
           complete: =>
             # Store the collection, unlock the vault, and execute the callback method.
             @store
@@ -315,7 +318,7 @@ class Vault
             object.status = "clean"
             @dirty_object_count--
           error: =>
-            @errors.push 'Failed to update.'
+            @messages.errors.push 'Failed to update.'
           complete: =>
             # Store the collection, unlock the vault, and execute the callback method.
             @store
@@ -327,13 +330,13 @@ class Vault
   reload: (after_load = ->) ->
     # Don't bother if the vault is locked or we're offline.
     if @locked
-      @errors.push 'Cannot reload, vault is locked.'
+      @messages.errors.push 'Cannot reload, vault is locked.'
       return after_load()
     else if not navigator.onLine
-      @errors.push 'Cannot reload, navigator is offline.'
+      @messages.errors.push 'Cannot reload, navigator is offline.'
       return after_load()
     else if not @urls.list?
-      @errors.push 'Cannot reload, list url is not configured.'
+      @messages.errors.push 'Cannot reload, list url is not configured.'
       return after_load()
 
     # Lock the vault until the reload is complete.
@@ -359,7 +362,7 @@ class Vault
         # Call the callback function as the reload is complete.
         after_load()
       error: =>
-        @errors.push 'Failed to list.'
+        @messages.errors.push 'Failed to list.'
 
         # Call the callback function as the reload is complete (albeit unsuccessful).
         after_load()
@@ -371,12 +374,12 @@ class Vault
   synchronize: (after_sync = ->) ->
     # Don't bother if we're offline.
     unless navigator.onLine
-      @errors.push 'Cannot synchronize, navigator is offline.'
+      @messages.errors.push 'Cannot synchronize, navigator is offline.'
       return after_sync()
 
     @save =>
       # Only reload the collection if there were no save errors.
-      if @errors.length is 0
+      if @messages.errors.length is 0
         @reload(after_sync)
       else
         after_sync()
@@ -455,7 +458,7 @@ class Vault
           object[sub_collection].add = (sub_object) =>
             # Don't bother if the vault is locked.
             if @locked
-              @errors.push 'Cannot add sub-object, vault is locked.'
+              @messages.errors.push 'Cannot add sub-object, vault is locked.'
               return false
             
             # Set a status on the object.
@@ -490,7 +493,7 @@ class Vault
           object[sub_collection].delete = (id) =>
             # Don't bother if the vault is locked.
             if @locked
-              @errors.push 'Cannot delete sub-object, vault is locked.'
+              @messages.errors.push 'Cannot delete sub-object, vault is locked.'
               return false
             
             # Remove the sub-object from its collection.
@@ -515,7 +518,7 @@ class Vault
           object[sub_collection].update = (attributes, id) =>
             # Don't bother if the vault is locked.
             if @locked
-              @errors.push 'Cannot update sub-object, vault is locked.'
+              @messages.errors.push 'Cannot update sub-object, vault is locked.'
               return false
             
             # Get the id of the sub-object from the attributes if it's not explicitly defined.
@@ -524,7 +527,7 @@ class Vault
             # Get the sub-object; return if it's undefined.
             sub_object = object[sub_collection].find(id)
             unless sub_object?
-              @errors.push 'Cannot update, sub-object not found.'
+              @messages.errors.push 'Cannot update, sub-object not found.'
               return false
 
             # If the root object was clean, flag it and increase the count of dirty objects.
