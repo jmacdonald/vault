@@ -67,8 +67,12 @@ class Vault
               # to use the newly instantiated vault object as required.
               window.setTimeout @options.after_load, 100
           else
-            # Load failed and we're offline; log an error.
-            @errors.push "Offline data failed to load. Could not load live data as browser is offline."
+            # Load failed and we're offline; use an empty dataset.
+            
+            # Detach the callback to after_load so that the call to the
+            # vault constructor can complete/return, allowing any post-load code
+            # to use the newly instantiated vault object as required.
+            window.setTimeout @options.after_load, 100
       else
         # Not using offline data; reload fresh data.
         if @urls.list?

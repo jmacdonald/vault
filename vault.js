@@ -51,7 +51,7 @@
                 window.setTimeout(this.options.after_load, 100);
               }
             } else {
-              this.errors.push("Offline data failed to load. Could not load live data as browser is offline.");
+              window.setTimeout(this.options.after_load, 100);
             }
           }
         } else {
