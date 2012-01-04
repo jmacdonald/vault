@@ -18,7 +18,6 @@
         errors: []
       };
       this.locked = false;
-      this.date = new Date;
       this.options = {
         autoload: true,
         after_load: function() {},
@@ -26,6 +25,7 @@
         offline: false,
         sub_collections: []
       };
+      this.ids_in_use = [];
       for (option in options) {
         value = options[option];
         this.options[option] = value;
@@ -115,7 +115,7 @@
         return false;
       }
       if (!((object[this.options.id_attribute] != null) && object[this.options.id_attribute] !== '')) {
-        object[this.options.id_attribute] = this.date.getTime();
+        object[this.options.id_attribute] = this.generate_id();
       }
       this.extend(object, "new");
       this.objects.push(object);
@@ -448,7 +448,7 @@
             }
             sub_object.status = "new";
             if (!((sub_object[this.options.id_attribute] != null) && sub_object[this.options.id_attribute] !== '')) {
-              sub_object[this.options.id_attribute] = this.date.getTime();
+              sub_object[this.options.id_attribute] = this.generate_id();
             }
             sub_object["delete"] = __bind(function() {
               return object[sub_collection]["delete"](sub_object[this.options.id_attribute]);
@@ -580,6 +580,22 @@
         new_instance[key] = this.clone(object[key]);
       }
       return new_instance;
+    };
+    Vault.prototype.generate_id = function() {
+      var id, id_is_available, taken, _i, _len, _ref;
+      while (!id_is_available) {
+        id = new Date().getTime();
+        id_is_available = true;
+        _ref = this.ids_in_use;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          taken = _ref[_i];
+          if (id === taken) {
+            id_is_available = false;
+          }
+        }
+      }
+      this.ids_in_use.push(id);
+      return id;
     };
     window.Vault = Vault;
     return Vault;

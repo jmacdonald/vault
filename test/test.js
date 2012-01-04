@@ -185,6 +185,33 @@
       expect(cars.objects.length).toEqual(4);
       return expect(cars.dirty_object_count).toEqual(1);
     });
+    it('creates a unique id every time an object is added', function() {
+      var tesla, viper;
+      tesla = cars.add({
+        make: "Tesla",
+        model: "Roadster",
+        year: 2009
+      });
+      viper = cars.add({
+        make: "Dodge",
+        model: "Viper",
+        year: 2010
+      });
+      return expect(tesla.id).toNotEqual(viper.id);
+    });
+    it('creates a unique id every time a second-level object is added', function() {
+      var car, intercooler, turbocharger;
+      car = cars.find(2);
+      turbocharger = car.parts.add({
+        name: "Turbocharger",
+        price: 1259.99
+      });
+      intercooler = car.parts.add({
+        name: "Intercooler",
+        price: 259.99
+      });
+      return expect(turbocharger.id).toNotEqual(intercooler.id);
+    });
     it('can read new objects', function() {
       var new_car;
       new_car = cars.add({

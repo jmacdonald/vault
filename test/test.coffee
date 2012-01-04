@@ -186,6 +186,32 @@ describe 'Vault', ->
     expect(cars.objects.length).toEqual(4)
     expect(cars.dirty_object_count).toEqual(1)
 
+  it 'creates a unique id every time an object is added', ->
+    tesla = cars.add
+      make: "Tesla",
+      model: "Roadster",
+      year: 2009
+    
+    viper = cars.add
+      make: "Dodge",
+      model: "Viper",
+      year: 2010
+    
+    expect(tesla.id).toNotEqual(viper.id)
+
+  it 'creates a unique id every time a second-level object is added', ->
+    car = cars.find(2)
+
+    turbocharger = car.parts.add
+      name: "Turbocharger",
+      price: 1259.99
+
+    intercooler = car.parts.add
+      name: "Intercooler",
+      price: 259.99
+    
+    expect(turbocharger.id).toNotEqual(intercooler.id)
+
   it 'can read new objects', ->
     new_car = cars.add
       make: "Dodge",
